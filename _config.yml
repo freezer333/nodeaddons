@@ -1,0 +1,12 @@
+# Setup
+name:         Node.js Addons
+tagline:      Your go-to place for learning C++ addons for Node.js
+baseurl:      ""
+include: ["_pages"]
+# Gems
+gems:
+  - jekyll-paginate
+
+#Others
+markdown: kramdown
+excerpt_separator: <!--more-->

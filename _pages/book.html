@@ -1,0 +1,193 @@
+---
+layout: default
+title:  "Node and C++ Integration - Ebook"
+permalink: /book/
+---
+        <div class="page">
+            <div class="page_content">
+                <h2>The good news...</h2>
+                <p>
+                    Fear not... you can overcome your speed or legacy code problem by writing native C++ addons for Node.js!  Once you know how, you can call your C++ code right from your Node.js code - easily and cleanly.
+                </p>
+                <h2>The bad news</h2>
+                <p>
+                    <img src="/images/research.gif" style="width:200px;float:right"/>
+                    Learning the complex C++ API for addon development is <b><u>hard</u></b>.  Answers are spread across a few blog <a target="_blank" href="http://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons"> posts </a> and <a target="_blank" href ="http://v8.paulfryzel.com/docs/master/">terse documentation</a>.  If you are looking for a step-by step and simple explanation, <b>you'll be looking for a long time!</b> Worse yet - since the V8 API changes so frequently, it's hard to blend all these resources together in a comprehensible and consistent way.
+                </p>
+                <h2>The solution</h2>
+                <p> <b>That's what this book is all about</b> - I've put together a comprehensive manual for creating your C++ addon.  Ranging from simple synchronous examples, asynchronous C++ modules and object oriented designs, to defending yourself against changing API's - "C++ and Node.js Integration" will get you to the finish line.  And it will save you weeks of research time!
+                </p>
+        </div>
+        <div class="page page_odd">
+            <div class="page_content">
+                <h1 class="section_h1">Want the book?</h1>
+                <div style="padding-top:0.5em; padding-bottom:2em; ">
+                    <div>
+                    <a style="float:left; margin-right:20px; margin-bottom:50px;" class="myButton" href="https://gum.co/dTVf" target="_blank">Buy Now!</a>
+                    
+                    For $24.99 you'll get the ebook (PDF, HTML and epub) containing over 200 pages of text describing dozens of addons, along with all the example code listings.</div>
+                </div>
+                <h1 class="section_h1">Need help deciding? </h1>
+                <p>Sign up to for my newsletter on Node.js integration. With your signup, you'll get a <span class="text_highlight">free copy of Chapter 2</span> - Understanding V8 Programming!</p>
+                <!-- Begin MailChimp Signup Form -->
+                <div id="mc_embed_signup">
+                <form class="form-blue" action="//scottfrees.us12.list-manage.com/subscribe/post?u=bb2ca971309da75fa431c4c5b&amp;id=e07df29e55" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+                    <div id="mc_embed_signup_scroll">
+                        <div class="mc-field-group form-group">
+                            <label class="form-label" for="mce-EMAIL">Email Address  <span class="asterisk">*</span></label>
+                            <input class="form-input" type="email" value="" name="EMAIL" class="form-control required email" id="mce-EMAIL">
+                        </div>
+                        <div class="mc-field-group form-group">
+                            <label class="form-label" for="mce-FNAME">First Name </label>
+                            <input class="form-input" type="text" value="" name="FNAME" class= "form-control" id="mce-FNAME">
+                        </div>
+                        <div class="mc-field-group form-group">
+                            <label class="form-label" for="mce-LNAME">Last Name </label>
+                            <input class="form-input" type="text" value="" name="LNAME" class= "form-control" id="mce-LNAME">
+                        </div>
+                        <div id="mce-responses" class="clear">
+                                <div class="response" id="mce-error-response" style="display:none"></div>
+                                <div class="response" id="mce-success-response" style="display:none"></div>
+                        </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+                        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_bb2ca971309da75fa431c4c5b_e07df29e55" tabindex="-1" value=""></div>
+                        <div class="form-group clear">
+                                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="myButton">
+                                <span class="text-muted indicates-required"><span class="asterisk">*</span> indicates required</span>
+                        </div>
+                    </div>
+                </form>
+                </div>
+
+                <!--End mc_embed_signup-->
+            </div>
+        </div>
+
+        <div class="page ">
+            <div class="page_content">
+                <h1 class="section_h1">Table of Contents</h1>
+                <p>
+                This book is a major expansion on a <a target="_blank" href="http://blog.scottfrees.com/c-processing-from-node-js">four-part series</a> on my blog on building C++ addons for Node.js.  I've expanded each of the topics into full chapters, and added four completely new chapters.  The book also contains more code examples, and coverage of the latest V8 API changes.
+                </p>
+                <div class="chapter">
+                    <h2>Chapter 1:  Introduction to Node.js Addons</h2>
+                    <p>Learn the basics of creating Node.js Addons and how to use node-gyp to create and test them.  We'll go through a few quick examples, and outline the rest of the book.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Chapter 2:  Understanding the V8 API</h2>
+                    <p> Learn about the C++ underpinnings of Node.js and how it all works.  You'll see why Node's interface with C++ is so efficient, and how V8's design effects how you write your addons.  In this chapter we'll cover all the V8 data types, and how the V8 memory system can be accessed from C++.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Chapter 3:  Basic Integration Patterns</h2>
+                    <p> See how to create your first full-featured C++ addon and pass JavaScript objects to C++.  We'll look at turning your JavaScript objects into first-class objects matching a C++ class definition and how to return data back to Node.js.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Chapter 4:  Asynchronous Addons</h2>
+                    <p>What good is a Node.js module if it blocks your event loop?  In this chapter you'll learn how to do the heavy computational task you've written in C++ asynchronously.  Just give your C++ code a JavaScript callback function, and your JavaScript can just keep on running until the C++ is done.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Chapter 5:  Object Wrapping</h2>
+                    <p>If you have existing C++ classes that you want to be able to use as "native" JavaScript objects, then you'll need to learn to wrap your C++ classes with V8 data structures.  </p>
+                </div>
+                <div class="chapter">
+                    <h2>Chapter 6:  Native Abstractions for Node (NAN)</h2>
+                    <p>The V8 API has undergone many "breaking" changes - and since different version of Node.js use different versions of V8, the situation can get pretty complex to manage.  This chapter will show you how to work at a higher level of abstraction using <a target="_blank" href="https://github.com/nodejs/nan">Nan</a> - the Native Abstractions for Node.js library.  Using Nan, you'll defend yourself from the changing V8 API.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Chapter 7:  Streaming between Node and C++</h2>
+                    <p>Learn how to build great interfaces to your C++ addon by supporting an event emitter and streaming interface for both sending data to you addon, and returning a data asynchronously to JavaScript.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Chapter 8:  Publishing Addons</h2>
+                    <p>Publishing your typical Node module to an npm repo is pretty simple - but since your C++ is <i>native executable code</i>, there are some hoops you'll need to jump through so your addon works on all operating systems.  In this chapter, we'll cover solutions to common pitfalls involved in publishing/deploying C++ addons.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Appendix A:  Getting your C++ to the Web</h2>
+                    <p>Addons aren't the only way of moving C++ to the web - in this section we'll take a look at some of the other options, like automation and shared libraries.</p>
+                </div>
+                <div class="chapter">
+                    <h2>Appendix B:  Buffers</h2>
+                    <p>One of the most efficient ways to move data between JavaScript and your C++ addons is by using buffers - which get stored outside V8's memory.  In this section we'll go through an image processing example that uses buffers to convert pixel data from PNG to BMP.</p>
+                </div>
+            </div>
+        </div>
+        <div class="page page_odd">
+            <div class="page_content">
+                <h1>Want to share it with your team?</h1>
+                <p>Save your developers' time by sharing this book with your team.  You can purchase a <a href="https://gum.co/AjXqZ">team license</a> that covers up to 50 developers for $99.99, or <a href="https://gum.co/mZMie"> corporate license</a> if you belong to an even bigger team.</p>
+                <p>
+                    <a class="myButton" href="https://gumroad.com/l/AjXqZ">Team (up to 50 users)</a>
+                    <a class="altButton" href="https://gumroad.com/l/mZMie">Corporate (entire organization)</a>
+                </p>
+            </div>
+        </div>
+        <div class="page mo">
+            <div class="page_content">
+            <h1>Do I need to be a JavaScript or C++ expert?</h1>
+            <p>Absolutely not - this book doesn't assume JavaScript or C++ mastery, only working knowledge.  In all examples and discussion, advanced topics in JavaScript are only presented when necessary - and always explained.  </p><p>All C++ code examples are approachable to the C++ novice.  Seasoned C++ vets will see where things could be written differently, using more advanced C++, without changing the spirit of the discussion. </p><p class="highlight">My goal is to show you how to integrate - not how clever JavaScript or C++ code can be.</p>
+            </div>
+            <div class="page_content">
+            <h1>Can't I find this information on my own?</h1>
+            <p>Most programmers learn new topics by scouring the web, piecing together <a target="_blank" href="http://stackoverflow.com/">SO</a> posts and <a target="_blank" href="http://v8.paulfryzel.com/docs/master/">API</a> docs to boost their skills.  </p><p>It normally works pretty well, but once you spend some time researching the V8 C++ API docs, you'll realize that C++ addons are a different animal.  Information is scarce, and often refers to out-of-date API's.  You find yourself at dead-ends and hitting one roadblock after another. </p><p class="highlight"> I went through this pain - and that's why I think this book is worth buying - it will save you from it!
+            </p>
+            </div>
+        </div>
+        <div class="page page_odd">
+            <div class="page_content">
+                <h1 class="section_h1">Want the book?</h1>
+                <div style="padding-top:0.5em; padding-bottom:2em; ">
+                    <div>
+                    <a style="float:left; margin-right:20px; margin-bottom:50px;" class="myButton" href="https://gum.co/dTVf" target="_blank">Buy Now!</a>
+                    
+                    For $24.99 you'll get the ebook (PDF, HTML and epub) containing over 200 pages of text describing dozens of addons, along with all the example code listings.</div>
+                </div>
+                <h1 class="section_h1">Need help deciding? </h1>
+                <p>Sign up to for my newsletter on Node.js integration. With your signup, you'll get a <span class="text_highlight">free copy of Chapter 2</span> - Understanding V8 Programming!</p>
+                <!-- Begin MailChimp Signup Form -->
+                <div id="mc_embed_signup">
+                <form class="form-blue" action="//scottfrees.us12.list-manage.com/subscribe/post?u=bb2ca971309da75fa431c4c5b&amp;id=e07df29e55" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+                    <div id="mc_embed_signup_scroll">
+                        <div class="mc-field-group form-group">
+                            <label class="form-label" for="mce-EMAIL">Email Address  <span class="asterisk">*</span></label>
+                            <input class="form-input" type="email" value="" name="EMAIL" class="form-control required email" id="mce-EMAIL">
+                        </div>
+                        <div class="mc-field-group form-group">
+                            <label class="form-label" for="mce-FNAME">First Name </label>
+                            <input class="form-input" type="text" value="" name="FNAME" class= "form-control" id="mce-FNAME">
+                        </div>
+                        <div class="mc-field-group form-group">
+                            <label class="form-label" for="mce-LNAME">Last Name </label>
+                            <input class="form-input" type="text" value="" name="LNAME" class= "form-control" id="mce-LNAME">
+                        </div>
+                        <div id="mce-responses" class="clear">
+                                <div class="response" id="mce-error-response" style="display:none"></div>
+                                <div class="response" id="mce-success-response" style="display:none"></div>
+                        </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+                        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_bb2ca971309da75fa431c4c5b_e07df29e55" tabindex="-1" value=""></div>
+                        <div class="form-group clear">
+                                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="myButton">
+                                <span class="text-muted indicates-required"><span class="asterisk">*</span> indicates required</span>
+                        </div>
+                    </div>
+                </form>
+                </div>
+
+                <!--End mc_embed_signup-->
+            </div>
+        </div>
+
+        <div class="page">
+            <div class="page_content">
+                <h1 class="target">About Me</h1>
+                <div class="profile">
+                    <img style="border-radius:5px" width="200" src="/images/sp.jpg"/>
+                </div>
+
+                <p>I am a <a href="http://pages.ramapo.edu/~sfrees" target="_blank">Professor of Computer Science</a> at Ramapo College of New Jersey, specializing in computer graphics, and web development.  I'm also a consultant and freelance developer, with over ten years of professional experience.</p>
+
+                <p>As a professional and as a scholar, I provide innovative solutions in a diverse set of fields - including mechanical engineering, computational biology, environmental science, and organic chemistry.</p>
+                <p>
+                I teach Web Application Development, Operating Systems, Computer Graphics, Database Systems, and a number of other courses at Ramapo College.   </p>
+
+            </div>
+
+        </div>
