@@ -477,7 +477,7 @@ header h2 {
   letter-spacing: 0;
 }
 
-.inner {
+.inner{
   position: relative;
   width: 940px;
   margin: 0 auto;
@@ -617,16 +617,11 @@ form {
   font-size: 2.8em;
   font-weight: normal;
   color: #474747;
-  text-indent: 6px;
-  letter-spacing: -1px;
+  
+  
 }
 
-#main-content h1:before {
-  padding-right: 0.3em;
-  margin-left: -0.9em;
-  color: #DC9456;
-  content: "/";
-}
+
 
 #main-content h2 {
   margin-bottom: 8px;
@@ -634,13 +629,7 @@ form {
   font-size: 22px;
   font-weight: bold;
   color: #474747;
-  text-indent: 4px;
-}
-#main-content h2:before {
-  padding-right: 0.3em;
-  margin-left: -1.5em;
-  content: "//";
-  color: #DC9456;
+ 
 }
 
 #main-content h3 {
@@ -650,15 +639,9 @@ form {
   font-size: 18px;
   font-weight: bold;
   color: #474747;
-  text-indent: 3px;
+  
 }
 
-#main-content h3:before {
-  padding-right: 0.3em;
-  margin-left: -2em;
-  content: "///";
-  color: #DC9456;
-}
 
 #main-content h4 {
   margin-bottom: 8px;
@@ -666,43 +649,28 @@ form {
   font-size: 15px;
   font-weight: bold;
   color: #474747;
-  text-indent: 3px;
+  
 }
 
-h4:before {
-  padding-right: 0.3em;
-  margin-left: -2.8em;
-  content: "////";
-  color: #DC9456;
-}
+
 
 #main-content h5 {
   margin-bottom: 8px;
   font-family: "Century Gothic",CenturyGothic,"AppleGothic",sans-serif;
   font-size: 14px;
   color: #474747;
-  text-indent: 3px;
+  
 }
-h5:before {
-  padding-right: 0.3em;
-  margin-left: -3.2em;
-  content: "/////";
-  color: #DC9456;
-}
+
 
 #main-content h6 {
   margin-bottom: 8px;
   font-family: "Century Gothic",CenturyGothic,"AppleGothic",sans-serif;
   font-size: .8em;
   color: #474747;
-  text-indent: 3px;
+  
 }
-h6:before {
-  padding-right: 0.3em;
-  margin-left: -3.7em;
-  content: "//////";
-  color: #DC9456;
-}
+
 
 p {
   margin-bottom: 20px;
@@ -761,7 +729,7 @@ dl dd {
 
 /* Tablet Portrait size to standard 960 (devices and browsers) */
 @media only screen and (min-width: 768px) and (max-width: 959px) {
-  .inner {
+  .inner, .page_content{
     width: 740px;
   }
   header h1, header h2 {
@@ -790,7 +758,7 @@ dl dd {
 
 /* All Mobile Sizes (devices and browser) */
 @media only screen and (max-width: 767px) {
-  .inner {
+  .inner, .page_content {
     width: 93%;
   }
   header {
@@ -865,6 +833,8 @@ dl dd {
 .book-sidebar p {
   font-size:larger;
 }
+
+.book-img,
 .book-sidebar img {
   box-shadow: 7px 7px 5px #888888;
 }
@@ -974,8 +944,15 @@ dl dd {
 	color:#DC9456;
 }
 
+.page1 {
+  padding-bottom:0px;
+  margin-bottom:0px;
+}
+.page1 .page_content {
+  padding-top:0px;
+}
 .page_content {
-	max-width:800px;
+	max-width:940px;
 	margin-left:auto;
 	margin-right:auto;
 	padding:0.5em;
@@ -1011,6 +988,48 @@ dl dd {
 	
 }
 
+nav {
+  margin-top:5px;
+}
+nav a {
+  margin-right:10px;
+  margin-top:10px;
+}
+
+.ghost-button-transition {
+  display: inline-block;
+  width: 100px;
+  padding: 8px;
+  color: #fff;
+  background-color: transparent;
+  border: 2px solid #fff;
+  text-align: center;
+  outline: none;
+  text-decoration: none;
+  transition: color 0.3s ease-out,
+              background-color 0.3s ease-out,
+              border-color 0.3s ease-out;
+}
+nav a.active,
+.ghost-button-transition:hover,
+.ghost-button-transition:active {
+  background-color: #DC9456;
+  border-color: #DC9456;
+  color: #fff;
+  transition: color 0.3s ease-in,
+              background-color 0.3s ease-in,
+              border-color 0.3s ease-in;
+}
+
+
+
+.posts .title {
+  font-size:16pt;
+}
+.posts  {
+  list-style-type: none;
+  padding-left:0px;
+}
 /* Mobile Landscape Size to Tablet Portrait (devices and browsers) */
 @media only screen and (min-width: 480px) and (max-width: 767px) { }
 

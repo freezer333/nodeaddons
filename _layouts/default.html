@@ -7,7 +7,6 @@
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/print.css" media="print" />
-    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/stylesheets/buttons.css" media="print" />
     <link rel="apple-touch-icon" sizes="57x57" href="{{ site.baseurl }}/images/icons/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="{{ site.baseurl }}/images/icons/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="{{ site.baseurl }}/images/icons/apple-icon-72x72.png">
@@ -33,22 +32,43 @@
   </head>
 
   <body>
-    <header>
+   <header>
       <div class="inner">
-        <a href="/">
+        <a href="{{ site.baseurl }}/">
         <h1> {{ site.name }} </h1>
         <h2>Learning C++ addons for Node.js</h2>
         </a>
-        <a href="https://github.com/freezer333/nodecpp-demo" class="button"><small>Get the tutorial on </small> GitHub</a>
+        <nav>
+          <a id="home_nav" class="ghost-button-transition" href="/">Home</a>
+          <a id="book_nav" class="ghost-button-transition" href="/book/">Book</a>
+          <!--<a id="course_nav" class="ghost-button-transition" href="/course/">Video Course</a>-->
+          <a class="ghost-button-transition" href="https://github.com/freezer333/nodecpp-demo">Code Tutorial</a>
+          <a id="blog_nav" class="ghost-button-transition" href="/blog/">Blog</a>
+          <script>
+            var loc = window.location.pathname;
+            var nav_id = "home_nav";
+            if ( "{{ page.blog }}" ){
+              nav_id = "blog_nav";
+            }
+            else if (loc.indexOf("/book") >= 0) {
+              nav_id = "book_nav";
+            }
+            else if (loc.indexOf("/course") >= 0) {
+              nav_id = "course_nav";
+            }
+            var nav = document.getElementById(nav_id);
+            nav.className += nav.className ? ' active' : 'active';
+          </script>
+        </nav>
       </div>
     </header>
 
     <div id="content-wrapper">
+      {% if page.sidebar %}
+      
       <div class="inner clearfix">
         <section id="main-content">
-          
           {{ content }}
-
         </section>
 
         <aside id="sidebar">
@@ -60,17 +80,15 @@
             </a>
              <a style="margin-top:20px;" class="altButton" href="https://gum.co/dTVf" target="_blank">Buy Now!</a>
           </div>
-          <h1>Blog Posts</h1>
-  <ul class="posts">
-    {% for post in site.posts %}
-      <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a> - <span>{{ post.date | date: "%m/%d/%Y" }}</span></li>
-    {% endfor %}
-  </ul>
-
-          
-          <p>This site was created by <br/><a href="https://scottfrees.com/">Scott Frees</a>.</p>
         </aside>
       </div>
+      {% else %}
+       <section>
+          
+          {{ content }}
+
+        </section>
+      {% endif %} 
     </div>
 
   </body>
