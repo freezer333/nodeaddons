@@ -851,6 +851,10 @@ dl dd {
   color:#DC9456;
 }
 
+
+figure.highlight { margin-left:0px;margin-right:0px;}
+.code {text-align:left}
+
 .myButton { 
 	-moz-box-shadow:inset 0px 1px 0px 0px #fce2c1;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #fce2c1;
