@@ -10,7 +10,7 @@ disqus_id : silvrback-scottfrees-16447
 disqus_shortname: scottfrees
 ---
 
-This article is Part 3 of a series of posts on moving data back and forth between Node.js and C++. This series is also expanded upon in my [ebook on Node/C++ Integration](https://scottfrees.com/ebooks/nodecpp/).  In [Part 1](https://blog.scottfrees.com/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript. In [Part 2](https://blog.scottfrees.com/c-processing-from-node-js-part-2) I modified the C++ addon to return a JavaScript object representing more complete statistics about each location/sample.
+This article is Part 3 of a series of posts on moving data back and forth between Node.js and C++. This series is also expanded upon in my [ebook on Node/C++ Integration](/book/).  In [Part 1](/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript. In [Part 2](/c-processing-from-node-js-part-2) I modified the C++ addon to return a JavaScript object representing more complete statistics about each location/sample.
 <!--more-->
 In each of the previous posts, the JavaScript objects being passed into C++ looked like this:
 
@@ -42,7 +42,7 @@ In Part 2, the C++ addon returned a `rain_result` object that looked list this:
 Now we'll look at passing an array of location data into C++ and having C++ return an array of results back to us.  All the code for this series of posts is found [here](https://github.com/freezer333/nodecpp-demo).
 
 # Receiving an Array from Node
-If you haven't read [Parts 1](https://blog.scottfrees.com/c-processing-from-node-js) and [2](http://blog.scottfrees.com/c-processing-from-node-js-part-2) of this post please do so now - its important you understand how I'm integrating C++ and JavaScript classes.  Instead of using the V8 object wrapping API, I'm just packing/unpacking data from V8's native objects into and out of my [POCOs](https://en.wikipedia.org/wiki/Plain_Old_C%2B%2B_Object).  While there is a little added work upfront, we'll see this work now be leveraged to make list processing really very easy.  
+If you haven't read [Parts 1](/c-processing-from-node-js) and [2](/c-processing-from-node-js-part-2) of this post please do so now - its important you understand how I'm integrating C++ and JavaScript classes.  Instead of using the V8 object wrapping API, I'm just packing/unpacking data from V8's native objects into and out of my [POCOs](https://en.wikipedia.org/wiki/Plain_Old_C%2B%2B_Object).  While there is a little added work upfront, we'll see this work now be leveraged to make list processing really very easy.  
 
 ## Registering the callable addon function
 As always, we start by writing a C++ function in `/cpp/rainfall_node.cc` that will be callable from Node.js.
@@ -134,7 +134,7 @@ void CalculateResults(const v8::FunctionCallbackInfo<v8::Value>&args) {
     unsigned int num_locations = input->Length();
 ```
 
-With the V8 array `input`, we'll now loop through and actually create a POCO `location` object using the `unpack_location` function we saw in [Part 2](https://blog.scottfrees.com/c-processing-from-node-js-part-2).  The return value from `unpack_location` is pushed onto a standard C++ vector.
+With the V8 array `input`, we'll now loop through and actually create a POCO `location` object using the `unpack_location` function we saw in [Part 2](/c-processing-from-node-js-part-2).  The return value from `unpack_location` is pushed onto a standard C++ vector.
 
 ```cpp
 for (unsigned int i = 0; i < num_locations; i++) {
@@ -161,7 +161,7 @@ Our next step is to move the data we've created into the V8 objects that we'll r
 ```cpp
 Local<Array> result_list = Array::New(isolate);
 ```
-We can now iterate through our `rain_result` vector and use the `pack_rain_result` function from [Part 2](https://blog.scottfrees.com/c-processing-from-node-js-part-2) to create a new V8 object and add it to the `result_list` array.
+We can now iterate through our `rain_result` vector and use the `pack_rain_result` function from [Part 2](/c-processing-from-node-js-part-2) to create a new V8 object and add it to the `result_list` array.
 
 ```cpp
 for (unsigned int i = 0; i < results.size(); i++ ) {
@@ -241,4 +241,4 @@ For most use cases I end up working with, the overhead of memory copying (both t
 For situations where the cost of copying input/output isn't dwarfed by your actual processing time, it would probably make more sense to use V8 object wrapping API instead.
 
 # Next up... asynchronous execution
-Now that we've seen how to move primitives, objects, and lists between Node and C++, in [Part 4](https://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons) we'll look at how to execute the bulk of our C++ work asynchronously in a separate thread using [libuv](https://libuv.org/) so JavaScript can just give the add-on a callback and continue on its way.
+Now that we've seen how to move primitives, objects, and lists between Node and C++, in [Part 4](/c-processing-from-node-js-part-4-asynchronous-addons) we'll look at how to execute the bulk of our C++ work asynchronously in a separate thread using [libuv](https://libuv.org/) so JavaScript can just give the add-on a callback and continue on its way.

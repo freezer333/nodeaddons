@@ -9,7 +9,7 @@ name: c-processing-from-node-js-part-4-asynchronous-addons
 disqus_id : silvrback-scottfrees-16963
 disqus_shortname: scottfrees
 ---
-This article is Part 4 of a series of posts on moving data back and forth between Node.js and C++. In [Part 1](http://blog.scottfrees.com/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript. In Parts [2](http://blog.scottfrees.com/c-processing-from-node-js-part-2) and [3](http://blog.scottfrees.com/c-processing-from-node-js-part-3-arrays), I covered more complex use cases involving moving lists and objects.  This post covers **asynchronous** C++ addons - which are probably the most useful.
+This article is Part 4 of a series of posts on moving data back and forth between Node.js and C++. In [Part 1](/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript. In Parts [2](/c-processing-from-node-js-part-2) and [3](/c-processing-from-node-js-part-3-arrays), I covered more complex use cases involving moving lists and objects.  This post covers **asynchronous** C++ addons - which are probably the most useful.
 <!--more-->
 # Why Asynchronous?
 If you are dropping into C++ to do some calculations, chances are good that you are doing it for speed.  If you are going though all this trouble for speed, then you probably have a hefty calculation to do - and its going to take time (even in C++!).
@@ -86,8 +86,7 @@ On the C++ side of things, we're going to utilize **three functions** and a **st
 1.  `WorkAsyncComplete` - the function that libuv will invoke when the worker thread is finished.  This function is executed on the *event loop thread*, **not** the worker thread.
 
 I like pictures:
-![Node and Libuv Worker Thread](http://scottfrees.com/node-worker-c.png)
-<img src="https://docs.google.com/drawings/d/1DD6FajO_vGmOHpk1kM2KTvApSIjc7JFF7HlwBBwX8jw/pub?w=960&h=720">
+![Node and Libuv Worker Thread](/images/node-worker-c.png)
 
 Lets look at the C++ code, starting with our Work Data structure:
 
@@ -130,7 +129,7 @@ Notice that the Work struct is created on the heap.  Remember, local variables (
     }
 ```
 
-The code above is really the same as from [Part 3](http://blog.scottfrees.com/c-processing-from-node-js-part-3-arrays). The key part is that we are extracting the arguments sent from JavaScript and putting them in a locations vector stored on the heap, within the `work` struct.
+The code above is really the same as from [Part 3](/c-processing-from-node-js-part-3-arrays). The key part is that we are extracting the arguments sent from JavaScript and putting them in a locations vector stored on the heap, within the `work` struct.
 
 Where earlier we now just went ahead and processed the rainfall data, now we'll kick off a worker thread using libuv.  First we store the callback sent to use from JavaScript, and then we're off.  Notice as soon as we call `uv_queue_work`, we return - the worker is executing in its own thread (`uv_queue_work` returns immediately).  
 
@@ -155,7 +154,7 @@ Notice the arguments to `uv_queue_work` - its the work->request we setup at the 
 At this point, control is passed back to Node (JavaScript).  If we had further JavaScript to execute, it would execute now.  Basically, from the JavaScript side, our addon is acting the same as any other asynchronous call we typically make (like reading from files).
 
 ## The worker thread
-The worker thread code is actually really simple. We just need to process the data - and since its already extracted out of the V8 objects, its pretty vanilla C++ code.  Its largely explained in [Part 3](http://blog.scottfrees.com/c-processing-from-node-js-part-3-arrays), with the exception of the cast of the `work` data.  Notice our function has been called with the libuv work request parameter.  We set this up above to point to our actual work data.
+The worker thread code is actually really simple. We just need to process the data - and since its already extracted out of the V8 objects, its pretty vanilla C++ code.  Its largely explained in [Part 3](/c-processing-from-node-js-part-3-arrays), with the exception of the cast of the `work` data.  Notice our function has been called with the libuv work request parameter.  We set this up above to point to our actual work data.
 
 ```cpp
 static void WorkAsync(uv_work_t *req)
@@ -205,7 +204,7 @@ static void WorkAsyncComplete(uv_work_t *req,int status)
 
 ```
 
-The first part of the function above is pretty standard - we get the work data, and we package up the results into V8 objects rather than C++ vectors.  Once again, this was all discussed in more detail in [Part 3](http://blog.scottfrees.com/c-processing-from-node-js-part-3-arrays).
+The first part of the function above is pretty standard - we get the work data, and we package up the results into V8 objects rather than C++ vectors.  Once again, this was all discussed in more detail in [Part 3](/c-processing-from-node-js-part-3-arrays).
 
 Next, we need to invoke the JavaScript callback that was originally passed to the addon.  **Note, this part is a lot different in Node 0.11 than it was in previous versions of Node because of recent V8 API changes.** If you are looking for ways to be a little less dependent on V8, take a look at [Nan](https://github.com/nodejs/nan).
 
@@ -233,4 +232,4 @@ rainfall.calculate_results_async(locations, function(results) {
 ```
 
 # What next?
-There's a lot more to learn about using C++ within Node.js - topics like wrapping existing C++ objects, working with multiple versions of the V8 API, and deployment on different platforms.  If you are looking for a manual that goes over all this and more, check out my [ebook on this topic](https://scottfrees.com/ebooks/nodecpp/) - it's a great shortcut!  You can [buy it here](https://gumroad.com/l/dTVf)
+There's a lot more to learn about using C++ within Node.js - topics like wrapping existing C++ objects, working with multiple versions of the V8 API, and deployment on different platforms.  If you are looking for a manual that goes over all this and more, check out my [ebook on this topic](/book/) - it's a great shortcut!  You can [buy it here](https://gumroad.com/l/dTVf)

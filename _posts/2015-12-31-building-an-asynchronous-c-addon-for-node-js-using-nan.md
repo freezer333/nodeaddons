@@ -9,20 +9,20 @@ name: building-an-asynchronous-c-addon-for-node-js-using-nan
 disqus_id : silvrback-scottfrees-20931
 disqus_shortname: scottfrees
 ---
-This post is the fourth and final in a series dedicated to showing you how to get your C++ application onto the web by integrating with Node.js.  In the [first post](https://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), I outlined three general options:
+This post is the fourth and final in a series dedicated to showing you how to get your C++ application onto the web by integrating with Node.js.  In the [first post](/getting-your-c-to-the-web-with-node-js), I outlined three general options:
 <!--more-->
-1. **[Automation](https://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app)** - call your C++ as a standalone app in a child process.
-2. **[Shared library](https://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app)** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
+1. **[Automation](/automating-a-c-program-from-a-node-js-web-app)** - call your C++ as a standalone app in a child process.
+2. **[Shared library](/calling-native-c-dlls-from-a-node-js-web-app)** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
 3. **Node.js Addon** - compile your C++ code as a native Node.js module/addon.
 
 Each of these options have their advantages and disadvantages, they primarily differ in the degree in which you need to modify your C++, the performance hit you are willing to take when calling C++, and your familiarity / comfort in dealing with Node.js and the V8 API.
 
-**If you haven't read the [first post](https://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**  The [second post](https://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app) covered automation in detail, and also introduced the C++ code that I'm focused on calling - a prime number implementation found [here](https://gist.github.com/freezer333/ee7c9880c26d3bf83b8e).  I covered the shared library route in the [third post](https://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app).
+**If you haven't read the [first post](/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**  The [second post](/automating-a-c-program-from-a-node-js-web-app) covered automation in detail, and also introduced the C++ code that I'm focused on calling - a prime number implementation found [here](https://gist.github.com/freezer333/ee7c9880c26d3bf83b8e).  I covered the shared library route in the [third post](/calling-native-c-dlls-from-a-node-js-web-app).
 
-This is about building native addon modules for Node.js.  The material builds on a lot of the topics I've described [previously](http://blog.scottfrees.com/c-processing-from-node-js), especially [asynchronous addons](http://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons).  I'll use [Nan](https://github.com/nodejs/nan) to simplify the development of asynchronous addons and also shield us from API-breaking changes that tend to crop up with [V8](https://developers.google.com/v8/?hl=en) - the engine that Node.js relies upon.   
+This is about building native addon modules for Node.js.  The material builds on a lot of the topics I've described [previously](/c-processing-from-node-js), especially [asynchronous addons](/c-processing-from-node-js-part-4-asynchronous-addons).  I'll use [Nan](https://github.com/nodejs/nan) to simplify the development of asynchronous addons and also shield us from API-breaking changes that tend to crop up with [V8](https://developers.google.com/v8/?hl=en) - the engine that Node.js relies upon.   
 
 ## Why develop an addon?
-Well... let's think first about "why not?".  If you don't have access to the source code of your legacy C++ application, then [automation](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app) is your best option - you won't be able to create the type of Node.js addon I'll describe here.  Of course, if your legacy code is *not C or C+++*, then automation might very well be your best bet as well (although there are indeed bindings from Node to other languages as well).  If your C/C++ code is already in a dll or shared library, then of course it likely makes the most sense to use FFI - as described [here](http://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app).
+Well... let's think first about "why not?".  If you don't have access to the source code of your legacy C++ application, then [automation](/automating-a-c-program-from-a-node-js-web-app) is your best option - you won't be able to create the type of Node.js addon I'll describe here.  Of course, if your legacy code is *not C or C+++*, then automation might very well be your best bet as well (although there are indeed bindings from Node to other languages as well).  If your C/C++ code is already in a dll or shared library, then of course it likely makes the most sense to use FFI - as described [here](/calling-native-c-dlls-from-a-node-js-web-app).
 
 For situations where you have complete access (and are comfortable editing) the C/C++ you are targeting though, creating a native addon is likely to be the most powerful approach.  First, if your code is already reasonably well organized (clearly defined entry and exit/return points), it won't be too difficult to create the addon itself - especially using Nan.  Second, addons are quite flexible - they can be blocking/synchronous or asynchronous, and support most use cases (i.e. passing/returning objects, arrays, etc.).  Finally, when you create a Node.js addon, your JavaScript code is cleaner than when using the automation or shared library approaches - as you'll see by comparing JavaScript code in this post with the other posts in the series.  You end up calling your C++ as if it is a completely normal JavaScript module in Node.
 
@@ -47,7 +47,7 @@ Once you've checked out the code, take a moment to survey the directory structur
  int generate_primes(int under, void * exchange);
 ```
 
-That code was placed in `/cpp/prime4lib`, and I'll use it when building the addon in this post.  Please checkout the [shared library post](http://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app) if you haven't already, so you are up to speed.
+That code was placed in `/cpp/prime4lib`, and I'll use it when building the addon in this post.  Please checkout the [shared library post](/calling-native-c-dlls-from-a-node-js-web-app) if you haven't already, so you are up to speed.
 
 We'll now create a Node.js Addon that uses that function and gives us our prime numbers through a simple API:
 
@@ -76,7 +76,7 @@ Node allows you to load modules written in C++ as natively compiled binaries - h
 
 Knowing a bit about the V8 API, along with the basics of packaging your module so it can be built with node-gyp on the target machines, you can create modules in C++ that integrate seamlessly with anyone's Node.js application.
 
-The only catch is (1) the V8 API is tricky - due to the complexities of memory management and coordinating resources between the JavaScript executing in the Node.js event loop and your own modules and (2) the API tends to change in subtle (and not so subtle) ways every so often.  To learn all about the details of this, check out my [posts](https://blog.scottfrees.com/c-processing-from-node-js), and my [ebook](https://scottfrees.com/ebooks/nodecpp/).
+The only catch is (1) the V8 API is tricky - due to the complexities of memory management and coordinating resources between the JavaScript executing in the Node.js event loop and your own modules and (2) the API tends to change in subtle (and not so subtle) ways every so often.  To learn all about the details of this, check out my [posts](/c-processing-from-node-js), and my [ebook](/book/).
 
 ## Nan - protection from the V8 API
 Happily, the folks at [io.js Addon API Working Group](https://github.com/nodejs/nan#governance--contributing) have created and maintained an abstraction layer around the V8 API which can make these challenges a bit easier to deal with.  You can read a lot about it [here](https://nodesource.com/blog/c-add-ons-for-nodejs-v4/)
@@ -250,7 +250,7 @@ We need to get the prime number computation off the Node.js event loop and into 
 
 The key to understanding Nan's abstractions and my code is to recognize that when your JavaScript calls your addon, all data coming from JavaScript belongs to V8.  We are going to launch a worker thread to do the computation, which allows the C++ code initally invoked to return back to JavaScript.  That's critical, because it means any data the worker thread accesses must **not** belong to JavaScript, as the scope of the initial invocation of your C++ code is destroyed.
 
-Likewise, data *produced* inside the worker thread is inaccessible to JavaScript, so when we fire a callback into JavaScript we'll need to do so with newly created data local to V8 and the event loop.  There's a lot more detail on this in my [asynchronous V8 post](http://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons).
+Likewise, data *produced* inside the worker thread is inaccessible to JavaScript, so when we fire a callback into JavaScript we'll need to do so with newly created data local to V8 and the event loop.  There's a lot more detail on this in my [asynchronous V8 post](/c-processing-from-node-js-part-4-asynchronous-addons).
 
 Thankfully, Nan provides a class - called `AsyncWorker` which sets up an easy pattern for doing all of this - making the thread creation and interaction with libuv completely transparent.  All we have to do is extend `AsyncWorker` and plug our code in.
 
@@ -388,12 +388,12 @@ router.post('/', function(req, res) {
 Fire up the web app (`node index` from `/web`) and try the link for `addon`.  No surprises.
 
 # Conclusion
-And that's it!  Over the last four posts I've outlined some useful methods for getting C++ onto the web.  I've gotten a bunch of feedback from readers about other approaches as well - like using [emscripten](https://github.com/kripken/emscripten) to compile C++ into JavaScript (thank you [Hacker News](https://news.ycombinator.com/item?id=10809475)!).  I've detailed [automation](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app) through child processes, using ffi to invoke [shared libraries](http://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app), and in this post I've shown you how to use Nan to build an asynchronous addon that can be seamlessly integrated into your Node.js app.  Hope this information has helped!
+And that's it!  Over the last four posts I've outlined some useful methods for getting C++ onto the web.  I've gotten a bunch of feedback from readers about other approaches as well - like using [emscripten](https://github.com/kripken/emscripten) to compile C++ into JavaScript (thank you [Hacker News](https://news.ycombinator.com/item?id=10809475)!).  I've detailed [automation](/automating-a-c-program-from-a-node-js-web-app) through child processes, using ffi to invoke [shared libraries](/calling-native-c-dlls-from-a-node-js-web-app), and in this post I've shown you how to use Nan to build an asynchronous addon that can be seamlessly integrated into your Node.js app.  Hope this information has helped!
 
-**P.S.** If you are looking for some more info on writing Node.js addons in C++, check my [ebook](https://scottfrees.com/ebooks/nodecpp/) on Node and C++ integration, along with my previous posts below. You can [buy it here](https://gumroad.com/l/dTVf).
+**P.S.** If you are looking for some more info on writing Node.js addons in C++, check my [ebook](/book/) on Node and C++ integration, along with my previous posts below. You can [buy it here](https://gumroad.com/l/dTVf).
 
-- [C++ processing from Node.js - An Introduction](http://blog.scottfrees.com/c-processing-from-node-js)
-- [C++ processing from Node.js - Returning objects to JavaScript from C++](http://blog.scottfrees.com/c-processing-from-node-js-part-2)
-- [C++ processing from Node.js - Passing Arrays of Objects](http://blog.scottfrees.com/c-processing-from-node-js-part-3-arrays)
-- [C++ processing from Node.js - Asynchronous addons](http://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons)
-- [C++ and Node.js Integration - ebook](https://scottfrees.com/ebooks/nodecpp/)
+- [C++ processing from Node.js - An Introduction](/c-processing-from-node-js)
+- [C++ processing from Node.js - Returning objects to JavaScript from C++](/c-processing-from-node-js-part-2)
+- [C++ processing from Node.js - Passing Arrays of Objects](/c-processing-from-node-js-part-3-arrays)
+- [C++ processing from Node.js - Asynchronous addons](/c-processing-from-node-js-part-4-asynchronous-addons)
+- [C++ and Node.js Integration - ebook](/book/)

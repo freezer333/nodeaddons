@@ -11,13 +11,13 @@ disqus_shortname: scottfrees
 ---
 I’ve got good news, I’ve finally completed the [C++ and Node.js Integration ebook](https://gumroad.com/l/dTVf)! I want to thank all of you for signing up for my newsletter to keep posted about the book - you kept me motivated!  Thanks also to all the people who reached out to me with ideas, tips, and insights into the topic - you were extremely helpful.
 <!--more-->
-You can [buy the book on gumroad](https://gumroad.com/l/dTVf) now, and there is a lot more information on the [book's webpage](https://scottfrees.com/ebooks/nodecpp/).  For those of you that purchase the book, it would be great to hear feedback from you - either on this post or just email me!
+You can [buy the book on gumroad](https://gumroad.com/l/dTVf) now, and there is a lot more information on the [book's webpage](/book/).  For those of you that purchase the book, it would be great to hear feedback from you - either on this post or just email me!
 
 The book is available in PDF, HTML, and epub.  **There's over 200 pages of text**, walking you through dozens of addons.  You can also get full access to the code discussed in the text over at [nodecpp-demo](https://github.com/freezer333/nodecpp-demo).  
 
 **If you'd like a sample chapter**, [sign up](http://eepurl.com/bIAQOb) for my Node.js Integration newsletter to keep up with posts to this blog.
 
-Here's a summary of the book contents - you can find more details [here](https://scottfrees.com/ebooks/nodecpp/).
+Here's a summary of the book contents - you can find more details [here](/book/).
 
 - **Chapter 1 - Introduction to Node.js Addons:**  Learn the basics of creating Node.js Addons and how to use node-gyp to create and test them.  We'll go through a few quick examples, and outline the rest of the book.
 -  __Chapter 2 - Understanding the V8 API:__  Learn about the C++ underpinnings of Node.js and how it all works.  You'll see why Node's interface with C++ is so efficient, and how V8's design effects how you write your addons.  In this chapter we'll cover all the V8 data types, and how the V8 memory system can be accessed from C++.

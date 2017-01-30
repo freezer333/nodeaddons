@@ -19,7 +19,7 @@ In this post I'll show you how to call C++ from JavaScript, passing JavaScript o
 - [C++ processing from Node.js - Passing Arrays of Objects](/c-processing-from-node-js-part-3-arrays)
 - [C++ processing from Node.js - Asynchronous addons](/c-processing-from-node-js-part-4-asynchronous-addons)
 
-Once you've looked at this series, there's still a lot more to learn about using C++ within Node.js - topics like wrapping existing C++ objects, working with multiple versions of the V8 API, and deployment on different platforms.  If you are looking for a manual that goes over all this and more, check out my [ebook on this topic](https://scottfrees.com/ebooks/nodecpp/) - it's a great shortcut!  You can [buy the ebook here](https://gumroad.com/l/dTVf).
+Once you've looked at this series, there's still a lot more to learn about using C++ within Node.js - topics like wrapping existing C++ objects, working with multiple versions of the V8 API, and deployment on different platforms.  If you are looking for a manual that goes over all this and more, check out my [ebook on this topic](/book/) - it's a great shortcut!  You can [buy the ebook here](https://gumroad.com/l/dTVf).
 
 # Integration Pattern
 I've chosen to handle objects in a way that minimizes the impact of the actual C++ code called by node.  This means that I did *not* employ the V8 class wrapping strategies, instead electing to code all transfer between V8 data types and C++ classes myself, in separate functions.  I like this method, because it keeps the V8 code isolated - and works when you don't want to directly mess with existing C++ code you are calling from node.  If you are looking to have a more automatic method of mapping V8 to C++ data structures, see this [excellent article](http://code.tutsplus.com/tutorials/writing-nodejs-addons--cms-21771), along with the [Node.js documentation](http://nodejs.org/api/addons.html#addons_wrapping_c_objects). 
@@ -288,7 +288,7 @@ Average rain fall = 1.25cm
 ```
 
 # Next up...
-We now have a fully functional node app calling C++.  We've successfully transformed a single JavaScript object into a C++ object.  In [Part 2](https://blog.scottfrees.com/c-processing-from-node-js-part-2) of this series, I'll expand on this example so the C++ code returns a full "result" object - along the lines of the class defined below.
+We now have a fully functional node app calling C++.  We've successfully transformed a single JavaScript object into a C++ object.  In [Part 2](/c-processing-from-node-js-part-2) of this series, I'll expand on this example so the C++ code returns a full "result" object - along the lines of the class defined below.
 
 ```c++
 class rain_result {

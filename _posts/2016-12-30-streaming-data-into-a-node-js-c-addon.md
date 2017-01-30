@@ -9,15 +9,15 @@ name: streaming-data-into-a-node-js-c-addon
 disqus_id : silvrback-scottfrees-28944
 disqus_shortname: scottfrees
 ---
-Earlier this year I [posted an article](http://blog.scottfrees.com/streaming-data-from-c-to-node-js) showing how we can build event-based and streaming interfaces for sending data from Node.js C++ addons to JavaScript.  This mode of interacting with addons can be a lot easier in some situations, especially when your C++ code runs [asynchronously](http://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons).  
+Earlier this year I [posted an article](/streaming-data-from-c-to-node-js) showing how we can build event-based and streaming interfaces for sending data from Node.js C++ addons to JavaScript.  This mode of interacting with addons can be a lot easier in some situations, especially when your C++ code runs [asynchronously](/c-processing-from-node-js-part-4-asynchronous-addons).  
 
-In this post, I'm going to use the [`streaming-worker`](https://www.npmjs.com/package/streaming-worker) and [`streaming-worker-sdk`](https://www.npmjs.com/package/streaming-worker-sdk) modules - which I've adapted from the Streaming chapter in my ebook: [C++ and JavaScript Integration](https://scottfrees.com/ebooks/nodecpp/). In the book, I cover the details of how streaming-worker and streaming-worker-sdk actually works internally - here I'll just focus on using them. 
+In this post, I'm going to use the [`streaming-worker`](https://www.npmjs.com/package/streaming-worker) and [`streaming-worker-sdk`](https://www.npmjs.com/package/streaming-worker-sdk) modules - which I've adapted from the Streaming chapter in my ebook: [C++ and JavaScript Integration](/book/). In the book, I cover the details of how streaming-worker and streaming-worker-sdk actually works internally - here I'll just focus on using them. 
 <!--more-->
 
 ## Working with `streaming-worker`
-The full source code for this example is [here](https://github.com/freezer333/streaming-worker).  Let's start out by setting up two directories - `/addon` and `/js`.  The C++ project and code will be in `/addon`.  If you've never worked on addons before, stop here and check out my [post on the basics](https://blog.scottfrees.com/c-processing-from-node-js) before continuing.   The `/js` directory will hold just the JavaScript program - which will have a dependency on the addon.
+The full source code for this example is [here](https://github.com/freezer333/streaming-worker).  Let's start out by setting up two directories - `/addon` and `/js`.  The C++ project and code will be in `/addon`.  If you've never worked on addons before, stop here and check out my [post on the basics](/c-processing-from-node-js) before continuing.   The `/js` directory will hold just the JavaScript program - which will have a dependency on the addon.
 
-I've already covered how `streaming-worker-sdk` works [here](http://blog.scottfrees.com/streaming-data-from-c-to-node-js), but as a refresher - `streaming-worker` and `streaming-worker-sdk` are two halves of a library I've created to facilitate event-based and streaming interfaces between addons.  For streaming data to JavaScript from C++, the `streaming-worker-sdk` C++ headers abstract away a lot of the details of working with asynchronous addons.  The `streaming-worker` JavaScript module creates an API for communicating with these addons.   In this post, we'll create an addon that sits in a loop within a worker threads and reads data off a queue abstraction provided by `streaming-worker-sdk`.  Data will be sent to our asynchronous addon using `streaming-worker`'s JavaScript API.
+I've already covered how `streaming-worker-sdk` works [here](/streaming-data-from-c-to-node-js), but as a refresher - `streaming-worker` and `streaming-worker-sdk` are two halves of a library I've created to facilitate event-based and streaming interfaces between addons.  For streaming data to JavaScript from C++, the `streaming-worker-sdk` C++ headers abstract away a lot of the details of working with asynchronous addons.  The `streaming-worker` JavaScript module creates an API for communicating with these addons.   In this post, we'll create an addon that sits in a loop within a worker threads and reads data off a queue abstraction provided by `streaming-worker-sdk`.  Data will be sent to our asynchronous addon using `streaming-worker`'s JavaScript API.
 
 ## The example
 If you've read this far, you probably have your own use case for emitting data to C++ in mind - so I'm going to keep this example really short - we'll build a simple accumulator.  Before getting into how to build it, I think it's helpful to see how the end-product will be used in JavaScript.
@@ -167,7 +167,7 @@ public:
 };
 ```
 
-Each `Message` object read contains string data, which in this case is just converted back to an integer.  The Accumulator treats a negative number as a signal to stop, and return the accumulated sum to JavaScript via `StreamingWorker`'s  `writeToNode` function - which was introduced in the [first post](http://blog.scottfrees.com/streaming-data-from-c-to-node-js).
+Each `Message` object read contains string data, which in this case is just converted back to an integer.  The Accumulator treats a negative number as a signal to stop, and return the accumulated sum to JavaScript via `StreamingWorker`'s  `writeToNode` function - which was introduced in the [first post](/streaming-data-from-c-to-node-js).
 
 At the bottom of  `accumulator.cpp` we must also include two functions to setup the addon properly when required from JavaScript.
 
@@ -181,7 +181,7 @@ StreamingWorker * create_worker(Callback *data
 NODE_MODULE(accumulate, StreamWorkerWrapper::Init)
 ```
 
-This is essentially boilerplate code to allow the `streaming-worker` module to package `Accumulator` into a proper Node.js Addon.  If you are interesting in seeing how it's all done, check out the [full source code](https://github.com/freezer333/nodecpp-demo/tree/master/streaming), and [my book](https://scottfrees.com/ebooks/nodecpp/).
+This is essentially boilerplate code to allow the `streaming-worker` module to package `Accumulator` into a proper Node.js Addon.  If you are interesting in seeing how it's all done, check out the [full source code](https://github.com/freezer333/nodecpp-demo/tree/master/streaming), and [my book](/book/).
 
 A simple `npm install` will build the addon.
 
@@ -210,7 +210,7 @@ acc.from.on('sum', function(value){
 ```
 Once instantiated, the addon is adorned with a `to` event emitter interface, we can emit messages to the addon - in this case a "value" event with an associated integer.  The addon will read this off it's queue to process the data.
 
-Once we emit `-1`, the `Accumulator` addon was written to calculate the sum, and emit the answer back.  We capture that by registering a handler on the `sum` event when fired by the associated `from` emitter connecting the [C++ to JavaScript](http://blog.scottfrees.com/streaming-data-from-c-to-node-js).
+Once we emit `-1`, the `Accumulator` addon was written to calculate the sum, and emit the answer back.  We capture that by registering a handler on the `sum` event when fired by the associated `from` emitter connecting the [C++ to JavaScript](/streaming-data-from-c-to-node-js).
 
 When run, you'll get the expected answer of 61.
 
@@ -244,4 +244,4 @@ acc.from.on('sum', function(value){
 
 This post was a followup to my initial post using `streaming-worker` to send events and stream data from C++ into JavaScript.  While this is a really simple example, hopefully this post can help you get started using `streaming-worker` for sending data *into* your C++ addons.   The full source code for all this is at https://github.com/freezer333/streaming-worker. You'll also find a few other examples that demonstrate other features. The setup is pretty general - you can use this to create addons that output lots of different types of data.
 
-There's a ton of V8/NAN work going on behind the scenes to make streaming-worker-sdk work, which includes a lot of interesting work with NAN's asynchronous addon patterns and ObjectWrap. If you want to learn how it all works, have a look at the contents of my [ebook - C++ and Node.js Integration](https://scottfrees.com/ebooks/nodecpp/), which can be [purchased here](https://gumroad.com/l/dTVf). 
+There's a ton of V8/NAN work going on behind the scenes to make streaming-worker-sdk work, which includes a lot of interesting work with NAN's asynchronous addon patterns and ObjectWrap. If you want to learn how it all works, have a look at the contents of my [ebook - C++ and Node.js Integration](/book/), which can be [purchased here](https://gumroad.com/l/dTVf). 

@@ -10,7 +10,7 @@ disqus_id : silvrback-scottfrees-15900
 disqus_shortname: scottfrees
 ---
 
-This article is Part 2 of a series of posts on moving data back and forth between Node.js and C++.  In [Part 1](https://blog.scottfrees.com/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript.
+This article is Part 2 of a series of posts on moving data back and forth between Node.js and C++.  In [Part 1](/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript.
 <!--more-->
 The JavaScript object passed into C++ looked something like this:
 
@@ -217,6 +217,6 @@ N = 5
 ```
 
 # Next up...
-You now have seen examples of passing simple objects back and forth between C++ and Node.js.  In the [next part](http://blog.scottfrees.com/c-processing-from-node-js-part-3-arrays) of the series, I'll look at some more complex use cases, where lists of objects and nested objects are being moved between JavaScript and the addon.
+You now have seen examples of passing simple objects back and forth between C++ and Node.js.  In the [next part](/c-processing-from-node-js-part-3-arrays) of the series, I'll look at some more complex use cases, where lists of objects and nested objects are being moved between JavaScript and the addon.
 
 By the way, if you are looking for more on Node and C++, [checkout my ebook](https://gumroad.com/l/dTVf).

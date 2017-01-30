@@ -9,13 +9,13 @@ name: getting-your-c-to-the-web-with-node-js
 disqus_id : silvrback-scottfrees-20215
 disqus_shortname: scottfrees
 ---
-This post is the second in a series of four posts dedicated to showing you how to get your C++ application onto the web by integrating with Node.js.  In the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), I outlined three general options:
+This post is the second in a series of four posts dedicated to showing you how to get your C++ application onto the web by integrating with Node.js.  In the [first post](/getting-your-c-to-the-web-with-node-js), I outlined three general options:
 <!--more-->
 1. **Automation** - call your C++ as a standalone app in a child process.
-2. **[Shared library](http://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app)** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
-3. **[Node.js Addon](http://blog.scottfrees.com/building-an-asynchronous-c-addon-for-node-js-using-nan)** - compile your C++ code as a native Node.js module/addon.
+2. **[Shared library](/calling-native-c-dlls-from-a-node-js-web-app)** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
+3. **[Node.js Addon](/building-an-asynchronous-c-addon-for-node-js-using-nan)** - compile your C++ code as a native Node.js module/addon.
 
-Each of these options have their advantages and disadvantages, they primarily differ in the degree in which you need to modify your C++, the performance hit you are willing to take when calling C++, and your familiarity / comfort in dealing with Node.js and the V8 API.  This post is all about automation.  **If you haven't read the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**
+Each of these options have their advantages and disadvantages, they primarily differ in the degree in which you need to modify your C++, the performance hit you are willing to take when calling C++, and your familiarity / comfort in dealing with Node.js and the V8 API.  This post is all about automation.  **If you haven't read the [first post](/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**
 
 ## Why use Automation?
 If your C++ runs standalone from a command line - or can be made to do so - you can run it using Node's [child process](https://nodejs.org/api/child_process.html) API.  This option works for bringing just about anything to the web - it really doesn’t make a difference what language your command line program is written in if you are simply running it.  If you are reading this hoping to get C code, Fortran code, or some other language onto the web - then this option is worth reading.  
@@ -35,7 +35,7 @@ For this particular post, checkout the **automation** tag
 ```
 
 # Case Study:  Prime Sieve C/C++ implementation
-As described in the [opening post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), I'm building all my examples for this series around a C implementation of the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) Prime number calculation strategy.  It's a good example problem, because speed matters big time for prime numbers - and the C code that I'm using is not exactly the type of thing you'd be eager to rewrite!  
+As described in the [opening post](/getting-your-c-to-the-web-with-node-js), I'm building all my examples for this series around a C implementation of the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) Prime number calculation strategy.  It's a good example problem, because speed matters big time for prime numbers - and the C code that I'm using is not exactly the type of thing you'd be eager to rewrite!  
 
 The example I'm using  - [found here](http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.html) - is actually pretty simple, compared to more complex techniques that leverage CPU caching, among other things.  Head over to [primesieve.org](http://primesieve.org/) to get an idea.  For implementations of Prime Sieve, the user of the program must enter a maximum value, and the algorithm will output all prime numbers "under" this value.  We'll call that input value "under" throughout most of this post.
 
@@ -202,7 +202,7 @@ Lets cover a few basics.  We only have one target defined ("standalone") - so it
 The result of our build operation - `node-gyp configure build` - should create an executable in `cpp/standalone_stdio/build/Release` called `standalone`.  You should be able to run it directly from the command line.  **Now let's run it from Node.js**.
 
 ## Automating from Node.js
-In the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js) I setup a really simple Node.js web application that had a single route that could calculate prime numbers using a pure JavaScript prime sieve implementation.  Now we'll create a second route that uses our C++ implementation.
+In the [first post](/getting-your-c-to-the-web-with-node-js) I setup a really simple Node.js web application that had a single route that could calculate prime numbers using a pure JavaScript prime sieve implementation.  Now we'll create a second route that uses our C++ implementation.
 
 In `cppwebify-tutorial/web/index.js` first we'll add a new entry in our `types` array for the new C++ route:
 
@@ -441,4 +441,4 @@ This post presented the first option introduced in the series - automation.  It 
 
 I wrote up three types of integration scenarios that I think cover the most common cases, but I'm sure there are some legacy (or new) programs that require different strategies - if you've seen some, drop a note into the comment section!
 
-In the [next post](http://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app), I'll take a look at the second option - compiling your C++ code into a shared library/DLL and calling it from Node.js.  This option offers better scalability because the C++ code is executed in process - however it does block your event loop.  It also allows your Node.js code to make many calls into the DLL, giving you more fine-grained interaction.  In this next post, I'll specifically cover compiling shared libraries in `node-gyp` as well as using the [`ffi`](https://github.com/node-ffi/node-ffi) module for Node.js to interact with it.
+In the [next post](/calling-native-c-dlls-from-a-node-js-web-app), I'll take a look at the second option - compiling your C++ code into a shared library/DLL and calling it from Node.js.  This option offers better scalability because the C++ code is executed in process - however it does block your event loop.  It also allows your Node.js code to make many calls into the DLL, giving you more fine-grained interaction.  In this next post, I'll specifically cover compiling shared libraries in `node-gyp` as well as using the [`ffi`](https://github.com/node-ffi/node-ffi) module for Node.js to interact with it.

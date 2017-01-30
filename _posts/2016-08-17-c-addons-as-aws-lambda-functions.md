@@ -21,7 +21,7 @@ Quoting directly from AWS,
 
 Lambda is a cool platform, but it only supports a few languages - Java, Node.js, and Python.  So... what if you want to expose some C++ code using Lambda?  Well, you can certainly link Java to C++ libraries, and Python can do the same.  In the Node.js world, the way we typically integrate C++ with JavaScript is through addons.  Node.js C++ addons are compiled (native) Node.js modules which are directly callable from JavaScript as any other Node.js module.  
 
-Node.js addons is a big topic - if you are new to addons, check out my [intro series](http://blog.scottfrees.com/c-processing-from-node-js) of posts.   I also have a [series](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js) specifically on integrating legacy C++ into Node.js web apps - which discusses some alternatives to addons.  If you are looking for a full treatment of integrating C++ and Node.js, check out my book - [C++ and Node.js Integration](https://scottfrees.com/ebooks/nodecpp/).
+Node.js addons is a big topic - if you are new to addons, check out my [intro series](/c-processing-from-node-js) of posts.   I also have a [series](/getting-your-c-to-the-web-with-node-js) specifically on integrating legacy C++ into Node.js web apps - which discusses some alternatives to addons.  If you are looking for a full treatment of integrating C++ and Node.js, check out my book - [C++ and Node.js Integration](/blog/).
 
 ## Addons on Lambda
 So, why is addon development for AWS Lambda different than the typical scenario?  The biggest issue is that AWS Lambda isn't going to invoke `node-gyp` or any other build tool you need might need before launching your function - you are responsible for creating the full binary package.  This means that at the very least, you'll need to build your addon on Linux before deploying to Lambda, and you'll possibly need to go as far as building it on Amazon Linux itself if you have dependencies.  There are also some quirks to getting the deployment to Lambda just right - and I'll cover those too here.
@@ -83,7 +83,7 @@ Lets start first with the addon.
 &gt; cd lambda-cpp/addon
 ```
 
-To create the addon, we need three files - our C++ source, a `package.json` to tell Node.js how to deal with this addon, and a `binding.gyp` file to handle the build process.  We're creating a super simple addon here - I'll skip most of the discussion.  Again, if you are looking for more details on addon development in general - check out my [other posts](http://blog.scottfrees.com/c-processing-from-node-js) and [my book](https://scottfrees.com/ebooks/nodecpp/).
+To create the addon, we need three files - our C++ source, a `package.json` to tell Node.js how to deal with this addon, and a `binding.gyp` file to handle the build process.  We're creating a super simple addon here - I'll skip most of the discussion.  Again, if you are looking for more details on addon development in general - check out my [other posts](/c-processing-from-node-js) and [my book](/book/).
 
 Let's start with the easiest - `binding.gyp`
 
@@ -145,7 +145,7 @@ void init(Local&lt;Object&gt; exports) {
 NODE_MODULE(average, init)
 ```
 
-Again, if you aren't familiar with using the V8 (or NAN) API to build addons, please check out my [other posts](http://blog.scottfrees.com/c-processing-from-node-js) and [my book](https://scottfrees.com/ebooks/nodecpp/).  In short, the `NODE_MODULE` macro at the bottom defines `init` as the function V8 should call when this module is loaded.  `init` adds a new function to the `exports` object for the module - associating `Average` with what now will be a callable function `average`.
+Again, if you aren't familiar with using the V8 (or NAN) API to build addons, please check out my [other posts](/c-processing-from-node-js) and [my book](/book/).  In short, the `NODE_MODULE` macro at the bottom defines `init` as the function V8 should call when this module is loaded.  `init` adds a new function to the `exports` object for the module - associating `Average` with what now will be a callable function `average`.
 
 We can build this by issuing a `node-gyp configure build` command.  If you have everything setup correctly, you should see `gyp info ok` at the bottom of the output.    
 

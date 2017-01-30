@@ -13,9 +13,9 @@ Learning how to pass information from JavaScript to C++ addons can be tricky.  C
 <!--more-->
 JavaScript primitives include Strings, Numbers, and Booleans - along with `null` and `undefined`.  V8 uses an inheritance hierarchy where `Primitive` extends `Value`, and all the individual primitives subclass `Primitive`.  In addition to the standard JavaScript primitives, V8 also supports integers (`Int32` and `Uint32`).  You can see all the rest of the Value types [here](https://v8docs.nodesource.com/io.js-3.0/dc/d0a/classv8_1_1_value.html).
 
-In this post, I'll show you some basics for working with numerics, and I'll point you to a **cheat sheet** I've used to learn how to do the [rest of the conversions](https://github.com/freezer333/nodecpp-demo/tree/master/conversions).  I also cover this topic in a lot more detail in my ebook on [Node.js C++ Integration](https://scottfrees.com/ebooks/nodecpp/), which you can [buy here](https://gumroad.com/l/dTVf).  
+In this post, I'll show you some basics for working with numerics, and I'll point you to a **cheat sheet** I've used to learn how to do the [rest of the conversions](https://github.com/freezer333/nodecpp-demo/tree/master/conversions).  I also cover this topic in a lot more detail in my ebook on [Node.js C++ Integration](/book/), which you can [buy here](https://gumroad.com/l/dTVf).  
 
-All references to JavaScript values are held in C++ through a Handle object - in most cases a `Local`.  The handles point to V8 storage cells within JavaScript runtime.  You can learn a lot more about storage cells in my previous post on [memory issues in V8](http://blog.scottfrees.com/how-not-to-access-node-js-from-c-worker-threads).
+All references to JavaScript values are held in C++ through a Handle object - in most cases a `Local`.  The handles point to V8 storage cells within JavaScript runtime.  You can learn a lot more about storage cells in my previous post on [memory issues in V8](/how-not-to-access-node-js-from-c-worker-threads).
 
 As you go through the API for working with primitives, you'll notice there is no assignment of `Local` objects - which at first may seem odd!  It makes a lot of sense however - for three reasons:
 
@@ -82,7 +82,7 @@ I've created a [repository](https://github.com/freezer333/nodecpp-demo/tree/mast
 &gt; git clone https://github.com/freezer333/nodecpp-demo.git
 ```
 
-To build both addons, go into the `loose` and `strict` directories and issue a `node-gyp configure build` command in each.  You'll need to have installed `node-gyp` globally first.  If your completely new to this - [check this out](http://blog.scottfrees.com/c-processing-from-node-js).
+To build both addons, go into the `loose` and `strict` directories and issue a `node-gyp configure build` command in each.  You'll need to have installed `node-gyp` globally first.  If your completely new to this - [check this out](/c-processing-from-node-js).
 
 ```
 &gt; cd nodecpp-demo/conversion/loose
@@ -197,4 +197,4 @@ void PassString(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
 Go [ahead and download](https://github.com/freezer333/nodecpp-demo) the complete source and take a look - the code is in the `/conversions` directory.  You'll see examples using Integers, Booleans, Objects, and Arrays.
 
 ## Looking for more info?
-This post is actually a small excerpt from a book  I've published - [Node.js C++ Addons](http://scottfrees.com/ebooks/nodecpp/) that covers this in detail.  In it, you'll also find equivalent code when using NaN.  If you are interested, click [here](http://scottfrees.com/ebooks/nodecpp/) for the full contents and info on how to get your copy.
+This post is actually a small excerpt from a book  I've published - [Node.js C++ Addons](/book/) that covers this in detail.  In it, you'll also find equivalent code when using NaN.  If you are interested, click [here](/book/) for the full contents and info on how to get your copy.

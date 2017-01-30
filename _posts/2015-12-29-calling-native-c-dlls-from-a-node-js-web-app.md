@@ -9,15 +9,15 @@ name: calling-native-c-dlls-from-a-node-js-web-app
 disqus_id : silvrback-scottfrees-20796
 disqus_shortname: scottfrees
 ---
-This post is the third in a series of four posts dedicated to showing you how to get your C++ application onto the web by integrating with in Node.js.  In the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), I outlined three general options:
+This post is the third in a series of four posts dedicated to showing you how to get your C++ application onto the web by integrating with in Node.js.  In the [first post](/getting-your-c-to-the-web-with-node-js), I outlined three general options:
 <!--more-->
-1. **[Automation](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app)** - call your C++ as a standalone app in a child process.
+1. **[Automation](/automating-a-c-program-from-a-node-js-web-app)** - call your C++ as a standalone app in a child process.
 2. **Shared library** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
-3. **[Node.js Addon](http://blog.scottfrees.com/building-an-asynchronous-c-addon-for-node-js-using-nan)** - compile your C++ code as a native Node.js module/addon.
+3. **[Node.js Addon](/building-an-asynchronous-c-addon-for-node-js-using-nan)** - compile your C++ code as a native Node.js module/addon.
 
 Each of these options have their advantages and disadvantages, they primarily differ in the degree in which you need to modify your C++, the performance hit you are willing to take when calling C++, and your familiarity / comfort in dealing with Node.js and the V8 API.
 
-**If you haven't read the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**  The [second post](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app) covered automation in detail, and also introduced the C++ code that I'm focused on calling - a prime number implementation found [here](https://gist.github.com/freezer333/ee7c9880c26d3bf83b8e).
+**If you haven't read the [first post](/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**  The [second post](/automating-a-c-program-from-a-node-js-web-app) covered automation in detail, and also introduced the C++ code that I'm focused on calling - a prime number implementation found [here](https://gist.github.com/freezer333/ee7c9880c26d3bf83b8e).
 
 This post focuses entirely on compiling your C++ as a shared library or DLL, and calling that code from Node.js using [FFI](https://github.com/node-ffi/node-ffi).  I'll also discuss some of the common issues you can run into when converting a legacy C++ application into a callable shared library.  This post focuses on C++, but any language that can be compiled into a native shared library can be called from Node.js using these techniques.  For example, if you are looking to compile Rust code into a library that can be integrated with Node.js, [check this out](http://oppenlander.me/articles/rust-ffi)!
 
@@ -28,7 +28,7 @@ Often you want fine-grain control and coordination between Node.js and C++.  You
 
 A shared library (or DLL) is an excellent solution in this situation.  If your C++ is already in a DLL, then you can get started right away - but if not, you can generally compile your legacy code into a DLL fairly easily - you just need to figure out which methods/functions you wish to expose to callers.  Once you have a DLL, utilizing the interface through Node.js is pretty easy (read on!).
 
-Converting a legacy C or C++ application into a DLL can be a good integration choice when automation is too cumbersome.  It also lets you avoid the intricacies of developing [native C/C++ modules](http://scottfrees.com/ebooks/nodecpp/) for Node using the V8 API, which isn't always trivial.
+Converting a legacy C or C++ application into a DLL can be a good integration choice when automation is too cumbersome.  It also lets you avoid the intricacies of developing [native C/C++ modules](/book/) for Node using the V8 API, which isn't always trivial.
 
 ## Getting the tutorial code
 All of the code for this series is available on [github](https://github.com/freezer333/cppwebify-tutorial):
@@ -42,12 +42,12 @@ For this particular post, checkout the **dll** tag
 ```
 > git checkout dll
 ```
-Once you've checked out the code, take a moment to survey the directory structure I've setup.  The `/cpp` directory is where I've put all the C++ applications developed for the [automation post](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app), with the shared source for prime number generation in `/cpp/prime4standalone`.  In this post, we'll need to modify the prime number code to allow it to work well as a DLL, and I'll put that code in `/cpp/prime4lib`.  As was the case in the other posts, the sample web application is in `/web`.  We'll just be adding one route (`ffi`) in this post - for the shared library implementation.
+Once you've checked out the code, take a moment to survey the directory structure I've setup.  The `/cpp` directory is where I've put all the C++ applications developed for the [automation post](/automating-a-c-program-from-a-node-js-web-app), with the shared source for prime number generation in `/cpp/prime4standalone`.  In this post, we'll need to modify the prime number code to allow it to work well as a DLL, and I'll put that code in `/cpp/prime4lib`.  As was the case in the other posts, the sample web application is in `/web`.  We'll just be adding one route (`ffi`) in this post - for the shared library implementation.
 
 # Preparing the C++ as a Shared Library
 If you are trying to integrate an existing shared library into Node.js, then you can basically skip this section - you are all set!  If you have some legacy C++ code that was originally a standalone app (or part of one), you need to prepare your code to work as a shared library first.  The major considerations when doing this is defining your API - the set of functions that should be callable by the host code (in our case, Node.js).  Perhaps your C++ already is organized such that these functions are ready to go - but you may need to do a bit of reorganization.
 
-Another main consideration is how you'll get your C++ code's output.  For example, in the [automation post](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app), I ran a bunch of standalone primesieve applications from Node - each one either outputted prime numbers directly to standard out or to an output file.  We don't want this for shared libraries though - we want the output *returned* to the caller.  To do this, you might need to get a bit creative - I'll show you how I've done it in the section below.
+Another main consideration is how you'll get your C++ code's output.  For example, in the [automation post](/automating-a-c-program-from-a-node-js-web-app), I ran a bunch of standalone primesieve applications from Node - each one either outputted prime numbers directly to standard out or to an output file.  We don't want this for shared libraries though - we want the output *returned* to the caller.  To do this, you might need to get a bit creative - I'll show you how I've done it in the section below.
 
 Here's the API I want my shared library to support.  Actually, it's not much of an API - it's just one function!
 
@@ -58,7 +58,7 @@ int getPrimes(int under, int primes[]);
 The first parameter represents the maximum value - such that we'll find all prime numbers *under* this value.  The prime numbers will be stuffed into the second parameter - an array.  It is assumed that this array has enough space to store all the generated prime numbers (`under` is a good "maximum" size.).  The function will return how many prime numbers were actually found.
 
 ## Capturing the output
-Now let's look at the code from the [automation post](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app).  Inside `/cpp/prime4standalone`, the `primesieve.c` file had one main function:
+Now let's look at the code from the [automation post](/automating-a-c-program-from-a-node-js-web-app).  Inside `/cpp/prime4standalone`, the `primesieve.c` file had one main function:
 
 ```c++
 int generate_args(int argc, char * argv[], FILE * out)
@@ -185,7 +185,7 @@ int getPrimes(int under, int primes[]) {
 Now, when we call `generate_primes`, which is defined in `primesieve.h`, we pass in a reference to our exchange.  Within `primesieve.c` that reference to the exchange object is called `out`.  All calls to `pass(out, x)` in `primesieve.c` result in the pointer `out` being cast as an `exchange` object (in `exchange.cpp`), and the callback (the lambda) is fired.  *The end result is that all values computed by `primesieve` are found in the `primes` array.*
 
 ## Building the Shared Library with gyp
-We need to build our shared library now.  Luckily, the very same toolset we used in the previous posts - `node-gyp` - can help us here as well.  Inside `/cpp/lib4ffi` you'll find another config file named `binding.gyp`.  It's quite similar to the gyp files found in the standalone examples from the [previous post](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app), but it links in the primesieve files from `/cpp/prime4lib` instead of `/cpp/prime4standalone` and it's build type is `shared_library` instead of `executable`.
+We need to build our shared library now.  Luckily, the very same toolset we used in the previous posts - `node-gyp` - can help us here as well.  Inside `/cpp/lib4ffi` you'll find another config file named `binding.gyp`.  It's quite similar to the gyp files found in the standalone examples from the [previous post](/automating-a-c-program-from-a-node-js-web-app), but it links in the primesieve files from `/cpp/prime4lib` instead of `/cpp/prime4standalone` and it's build type is `shared_library` instead of `executable`.
 
 Build the shared library by issuing the familiar `node-gyp configure build` from `cpp/lib4ffi`.  This will generate a target shared library we can use from node.  The shared library will be in `/cpp/lib4ffi/build/Release` - with an extension specific to your operating system (ie. prime.dylib on OS X, prime.dll on Windows).
 
@@ -288,4 +288,4 @@ Now fire up your web app by typing `node index.js` from `/web` and choose the ff
 # Up next...
 This post presented the second option introduced in the series - using a DLL/shared library and `node-ffi`.  This option is perfect if you already have a DLL - but I also spent some time in this post showing you how to take existing standalone programs and re-organizing them so they can be built into shared libraries.  We used node-gyp to build the shared libraries in a cross-platform manner, and I showed you how to call the library using `node-ffi` - effectively integrating the C++ code and Node.js without getting into the details of V8.  This option will work for C and C++ libraries, but also works with any language that can be compiled to a native library (i.e. Rust).  The big advantage over automation is that you can have much more fine-grained coordination between Node.js and C++ - because you can pick and choose when to call any one of the functions your C++ library exposes.
 
-In the [next post](http://blog.scottfrees.com/building-an-asynchronous-c-addon-for-node-js-using-nan), we get to the most complex, but also the most powerful Node.js / C++ integration strategy - writing native Node.js modules.  I've covered native modules extensively in previous [posts](http://blog.scottfrees.com/c-processing-from-node-js), and I'm also working on an [ebook](http://scottfrees.com/ebooks/nodecpp/) covering the subject.  In the next post, I'll show you how to leverage the Nan library to build native modules that are not tied to specific version of the V8 engine - an important topic I've yet to cover on this blog.  
+In the [next post](/building-an-asynchronous-c-addon-for-node-js-using-nan), we get to the most complex, but also the most powerful Node.js / C++ integration strategy - writing native Node.js modules.  I've covered native modules extensively in previous [posts](/c-processing-from-node-js), and I'm also working on an [ebook](/book/) covering the subject.  In the next post, I'll show you how to leverage the Nan library to build native modules that are not tied to specific version of the V8 engine - an important topic I've yet to cover on this blog.  

@@ -12,7 +12,7 @@ disqus_shortname: scottfrees
 
 So, you've got some old C or C++ code, playing an important role in your business - but you desperately want to get that functionality on the web - maybe just internally to streamline your workflow, or maybe publically in order to fulfill some other goal.  The problem, of course, is that C++ isn't exactly easy to put onto the web - so what are your options?
 <!--more-->
-This post is kicking off a series dedicated to showing you how to take your legacy (or new) C/C++ code to the web by integrating it with [Node.js](https://nodejs.org).  In a previous series I detailed one option - [Node.js Addons](https://scottfrees.com/ebooks/nodecpp/) - but in this series I'm covering a few more, along with giving you some guidance on which method might be best in your situation.
+This post is kicking off a series dedicated to showing you how to take your legacy (or new) C/C++ code to the web by integrating it with [Node.js](https://nodejs.org).  In a previous series I detailed one option - [Node.js Addons](/book/) - but in this series I'm covering a few more, along with giving you some guidance on which method might be best in your situation.
 
 ## Can't I just write a C++ web site?
 Well... yes - you could!  People have been writing parts of web applications in C++ for a very long time - using CGI.  If you want to take a look, check out the notes at the end of the post for some starting points.   CGI isn't the most popular thing on the web these days though, it lacks a lot of productivity enhancements that makes web development so great today.  More importantly, it introduces some significant performance and scalability issues.  On the other hand, C++ has come a long way over the past few years in terms of expressiveness, and the C++14 standard has enabled a some really cool projects focused on writing modern MVC-styled web apps in pure C++.  If that's your thing, check out [Silicon](http://siliconframework.org/).
@@ -34,9 +34,9 @@ The **third reason** not to rewrite your C++ is because it might really want to 
 # C++ and Node.js - your options
 I've come up with three general ways of integrating C++ code with a Node.js application - although there are lots of variations within each category:
 
-1. **[Automation](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app)** - call your C++ as a standalone app in a child process.
-2. **[Shared library](http://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app)** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
-3. **[Node.js Addon](http://blog.scottfrees.com/building-an-asynchronous-c-addon-for-node-js-using-nan)** - compile your C++ code as a native Node.js module/addon.
+1. **[Automation](/automating-a-c-program-from-a-node-js-web-app)** - call your C++ as a standalone app in a child process.
+2. **[Shared library](/calling-native-c-dlls-from-a-node-js-web-app)** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
+3. **[Node.js Addon](/building-an-asynchronous-c-addon-for-node-js-using-nan)** - compile your C++ code as a native Node.js module/addon.
 
 Each of these options have their advantages and disadvantages, they primarily differ in the degree in which you need to modify your C++, the performance hit you are willing to take when calling C++, and your familiarity / comfort in dealing with Node.js and the V8 API.
 
@@ -44,15 +44,15 @@ Each of these options have their advantages and disadvantages, they primarily di
 The most obvious question to ask first is **do you have access to the C++ source**, *or just the binary?*  Without source code, you need to hope the C++ program is either a command line program or a dll/lib shared library.  If you are looking at a program written with only a graphical user interface… well then you are in a world of pain.  It’s likely you are going to need to rewrite your application in order to make it work on the web.
 
 ### Option 1 - Automation
-If your C++ runs as a standalone from a command line,  you don’t need the source code to take advantage of Option 1 - the **automation option**.  You can run your C++ program unaltered, using Node's [child process](https://nodejs.org/api/child_process.html) API.  This option works for bringing just about anything to the web - it really doesn’t make a difference what language your command line program is written in if you are simply running it.  If you are reading this hoping to get C code, Fortran code, or some other language onto the web - then this option is worth reading.  I'll discuss this in the next post, which you can read [here](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app).
+If your C++ runs as a standalone from a command line,  you don’t need the source code to take advantage of Option 1 - the **automation option**.  You can run your C++ program unaltered, using Node's [child process](https://nodejs.org/api/child_process.html) API.  This option works for bringing just about anything to the web - it really doesn’t make a difference what language your command line program is written in if you are simply running it.  If you are reading this hoping to get C code, Fortran code, or some other language onto the web - then this option is worth reading.  I'll discuss this in the next post, which you can read [here](/automating-a-c-program-from-a-node-js-web-app).
 
 The automation option is not only for those *without* the underlying C++ code.  If you have C++ code that either is currently, or could easily be turned into, a command line program - then this option is reasonable if you can live with the performance, and you don’t really want to get into the hassles of language integration.
 
 ### Option 2 - Shared Library / DLL
-If you are dealing with a C++ dll/lib, or you have the C++ source code and can make modest modifications in order to create a shared library, then the **shared library** approach might work well for you.  I'll detail how you can do this using the [Foreign Function Interface](https://github.com/node-ffi/node-ffi) module in the third post of this series.  This option gives you more fine-grain control of how you integrate C++ into Node, because calls to C++ routines can be interleaved with Node.js code itself.  While this approach brings you closer to full integration, you still have to deal with type conversions and blocking (see [here](https://github.com/node-ffi/node-ffi/wiki/Node-FFI-Tutorial#async-library-calls) for asyc with ffi) when calling C++.  It's a great option if you want better integration, without investing a lot of time dealing with V8.  This option is the subject of the [third post](http://blog.scottfrees.com/calling-native-c-dlls-from-a-node-js-web-app) in this series.
+If you are dealing with a C++ dll/lib, or you have the C++ source code and can make modest modifications in order to create a shared library, then the **shared library** approach might work well for you.  I'll detail how you can do this using the [Foreign Function Interface](https://github.com/node-ffi/node-ffi) module in the third post of this series.  This option gives you more fine-grain control of how you integrate C++ into Node, because calls to C++ routines can be interleaved with Node.js code itself.  While this approach brings you closer to full integration, you still have to deal with type conversions and blocking (see [here](https://github.com/node-ffi/node-ffi/wiki/Node-FFI-Tutorial#async-library-calls) for asyc with ffi) when calling C++.  It's a great option if you want better integration, without investing a lot of time dealing with V8.  This option is the subject of the [third post](/calling-native-c-dlls-from-a-node-js-web-app) in this series.
 
 ### Option 3 - Node.js Addon
-If you have the C++ source code, and you are willing to learn a bit about **Node.js Addons**, then a third option is creating a native Node.js module out of your C++. While this is the more challenging approach, you gain a ton of flexibility and performance.  You also have the option to call your C++ asynchronously so you don't block your web application's event-loop while your C++ is crunching numbers.  The [fourth post](http://blog.scottfrees.com/building-an-asynchronous-c-addon-for-node-js-using-nan) in this series covers this option using the [Nan library](https://github.com/nodejs/nan).  I've also written about addons in previous posts (see Notes below).  While we're at it, I've also published an ebook that covers this in much more detail - [check it out](https://scottfrees.com/ebooks/nodecpp/)!
+If you have the C++ source code, and you are willing to learn a bit about **Node.js Addons**, then a third option is creating a native Node.js module out of your C++. While this is the more challenging approach, you gain a ton of flexibility and performance.  You also have the option to call your C++ asynchronously so you don't block your web application's event-loop while your C++ is crunching numbers.  The [fourth post](/building-an-asynchronous-c-addon-for-node-js-using-nan) in this series covers this option using the [Nan library](https://github.com/nodejs/nan).  I've also written about addons in previous posts (see Notes below).  While we're at it, I've also published an ebook that covers this in much more detail - [check it out](/book/)!
 
 ## A running example - Prime Numbers
 Throughout the next three posts in this series I'll be showing you examples of how to implement each of the options above.  I want to use the same basic example in each.  Prime numbers are extremely important for lots of stuff (i.e. cryptography), and their generation tends to be really computationally expensive.  A quick search online will direct you mostly towards C and C++ implementations - and the really efficient ones are *complicated*.  Looking at their source, you'll instantly recognize that you probably don't' want to rewrite them - unless you are just looking for a challenge - which is fine:).
@@ -144,7 +144,7 @@ router.post('/', function(req, res) {
 ```
 
 # Up next...
-This post is kicking off a series where we'll dive into all three options for integrating C++ into Node.js - [(1) automation](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app), (2) shared library, and (3) addons.  I've outlined why you'd choose each one, and shown you the basic example I'll be extending throughout the series.  In the [next post](http://blog.scottfrees.com/automating-a-c-program-from-a-node-js-web-app), we'll take a closer look at automation option.
+This post is kicking off a series where we'll dive into all three options for integrating C++ into Node.js - [(1) automation](/automating-a-c-program-from-a-node-js-web-app), (2) shared library, and (3) addons.  I've outlined why you'd choose each one, and shown you the basic example I'll be extending throughout the series.  In the [next post](/automating-a-c-program-from-a-node-js-web-app), we'll take a closer look at automation option.
 
 # Notes
 If you are looking for additional information about anything I talked about above, here are some links that might help you.  Let me know if I'm missing anything!
@@ -159,8 +159,8 @@ If you are looking for additional information about anything I talked about abov
 - [Joel Spolski - Things You Should Never Do, Part I](http://www.joelonsoftware.com/articles/fog0000000069.html)
 
 ## Previous Posts on Node.js Addons
-- [C++ processing from Node.js - An Introduction](http://blog.scottfrees.com/c-processing-from-node-js)
-- [C++ processing from Node.js - Returning objects to JavaScript from C++](http://blog.scottfrees.com/c-processing-from-node-js-part-2)
-- [C++ processing from Node.js - Passing Arrays of Objects](http://blog.scottfrees.com/c-processing-from-node-js-part-3-arrays)
-- [C++ processing from Node.js - Asynchronous addons](http://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons)
-- [C++ and Node.js Integration - ebook](http://scottfrees.com/ebooks/nodecpp/)
+- [C++ processing from Node.js - An Introduction](/c-processing-from-node-js)
+- [C++ processing from Node.js - Returning objects to JavaScript from C++](/c-processing-from-node-js-part-2)
+- [C++ processing from Node.js - Passing Arrays of Objects](/c-processing-from-node-js-part-3-arrays)
+- [C++ processing from Node.js - Asynchronous addons](/c-processing-from-node-js-part-4-asynchronous-addons)
+- [C++ and Node.js Integration - ebook](/book/)
