@@ -12,6 +12,7 @@ disqus_shortname: scottfrees
 Earlier this year I [posted an article](http://blog.scottfrees.com/streaming-data-from-c-to-node-js) showing how we can build event-based and streaming interfaces for sending data from Node.js C++ addons to JavaScript.  This mode of interacting with addons can be a lot easier in some situations, especially when your C++ code runs [asynchronously](http://blog.scottfrees.com/c-processing-from-node-js-part-4-asynchronous-addons).  
 
 In this post, I'm going to use the [`streaming-worker`](https://www.npmjs.com/package/streaming-worker) and [`streaming-worker-sdk`](https://www.npmjs.com/package/streaming-worker-sdk) modules - which I've adapted from the Streaming chapter in my ebook: [C++ and JavaScript Integration](https://scottfrees.com/ebooks/nodecpp/). In the book, I cover the details of how streaming-worker and streaming-worker-sdk actually works internally - here I'll just focus on using them. 
+<!--more-->
 
 ## Working with `streaming-worker`
 The full source code for this example is [here](https://github.com/freezer333/streaming-worker).  Let's start out by setting up two directories - `/addon` and `/js`.  The C++ project and code will be in `/addon`.  If you've never worked on addons before, stop here and check out my [post on the basics](https://blog.scottfrees.com/c-processing-from-node-js) before continuing.   The `/js` directory will hold just the JavaScript program - which will have a dependency on the addon.
