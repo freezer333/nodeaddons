@@ -14,7 +14,6 @@ Node.js applications (including electron apps) are being deployed everywhere, an
 Native addons present a problem though.  Native C++ addons are distributed as modules just like anything else, but then `npm` *builds them* on the target machine during the install using `node-gyp`.  `node-gyp` isn't a compiler, it's build system that adapts to the platform it's on - on Windows it will use Visual Studio and on Linux/macOS it will use the build system installed as well.  When trying to install an application on a machine *without* a compiler, we are out of luck.
 
 Enter `node-pre-gyp`, a convenient tool that lets you deliver pre-built native addons as binary payloads - targeted to the user's platform.  Sounds magical, and in some respects it is!  In this post, I'm going to walk you through how `node-pre-gyp` works.  I'll create an addon that uses platform (OS) specific API's for Windows, macOS, and Linux.  You'll learn how to package a platform-dependent addon into a module that can be deployed to end user machines as binaries.  
-
 <!--more-->
 
 ## What is `node-preaTalk-gyp`?

@@ -1,13 +1,22 @@
 # Setup
 name:         Node.js Addons
-tagline:      Your go-to place for learning C++ addons for Node.js
+tagline:      Your go-to destination for learning C++ addons for Node.js
 baseurl:      ""
+url:          https://nodeaddons.com
 include: ["_pages"]
+safe: false
 # Gems
 gems:
   - jekyll-paginate
+  - jekyll-feed
+  - jekyll-sitemap
 
 #Others
 markdown: kramdown
 excerpt_separator: <!--more-->
 highlighter: rouge
+
+author: "Scott Frees"
+
+feed:
+  path: feed.rss
