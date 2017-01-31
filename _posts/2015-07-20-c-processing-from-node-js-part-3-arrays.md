@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "C++ processing from Node.js - Part 3 - Arrays"
 date:   2015-07-20 15:40:56
 permalink: /c-processing-from-node-js-part-3-arrays/

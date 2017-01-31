@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "C++ Processing from Node.js"
 date:   2015-06-17 15:40:56
 permalink: /c-processing-from-node-js/

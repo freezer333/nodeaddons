@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "Automating a C++ program from a Node.js web app"
 date:   2015-12-16 15:40:56
 permalink: /automating-a-c-program-from-a-node-js-web-app/

@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "Streaming data from C++ to Node.js"
 date:   2016-07-20 15:40:56
 permalink: /streaming-data-from-c-to-node-js/

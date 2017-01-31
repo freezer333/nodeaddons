@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "Type conversions from JavaScript to C++ in V8"
 date:   2016-04-02 15:40:56
 permalink: /type-conversions-from-javascript-to-c-in-v8/

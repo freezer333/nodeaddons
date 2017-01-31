@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "C++ and Node.js Integration - eBook Published"
 date:   2016-06-17 15:40:56
 permalink: /c-and-node-js-integration-ebook-published/

@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "Getting your C++ to the Web with Node.js"
 date:   2015-12-03 15:40:56
 permalink: /getting-your-c-to-the-web-with-node-js/

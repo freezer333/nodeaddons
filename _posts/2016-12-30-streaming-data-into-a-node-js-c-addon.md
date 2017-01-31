@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "Streaming data into a Node.js C++ Addon"
 date:   2016-12-30 15:40:56
 permalink: /streaming-data-into-a-node-js-c-addon/

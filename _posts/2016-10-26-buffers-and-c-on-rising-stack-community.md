@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "Buffers and C++ on Rising Stack - Community"
 date:   2016-10-26 15:40:56
 permalink: /buffers-and-c-on-rising-stack-community/

@@ -2,6 +2,7 @@
 layout: post
 sidebar : true
 blog: true
+newsletter: true
 title:  "Building an Asynchronous C++ Addon for Node.js using Nan"
 date:   2015-12-31 15:40:56
 permalink: /building-an-asynchronous-c-addon-for-node-js-using-nan/

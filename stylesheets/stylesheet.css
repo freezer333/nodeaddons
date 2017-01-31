@@ -565,6 +565,12 @@ pre {
   background: #fff;
   border: solid 1px #f2f2f2;
 }
+
+pre.inline {
+  display:inline;
+  margin:0px;
+  padding:1px;
+}
 pre code {
   padding: 0;
   color: #2879d0;
@@ -824,28 +830,30 @@ dl dd {
   }
 }
 
-.sales-header {
-  min-height:275px;
-}
 .book-sidebar {
-  margin-bottom:50px;
+  margin-bottom:100px;
+  text-align:center;
 }
-.book-sidebar p {
-  font-size:larger;
-}
-
 .book-img,
 .book-sidebar img {
   box-shadow: 7px 7px 5px #888888;
+  border-radius:5px;
+  width:195px;
 }
 .book-sidebar .tagline {
   color: #DC9456;
+  font-size:16pt;
+  cursor:pointer;
+}
+
+.book-sidebar .bline {
+  font-style: italic;
+  font-size:14pt;
 }
 .book_button {
   position: absolute;
   top: 0;
   right: 0;
-
 }
 .page_odd h1 {
   color:#DC9456;
