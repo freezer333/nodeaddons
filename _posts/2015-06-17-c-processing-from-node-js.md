@@ -111,7 +111,7 @@ To expose our C++ "library" as a node.js addon we build some wrapper code.  The 
 We need to create a new .cc file (I called it `rainfall_node.cc`), which includes
 the `node.h` and `v8.h` headers.  Next, we need to define an entry point for our addon - which is achieved by creating a function and registering it via a macro provided by the node/v8 headers.
 
-```cc
+```cpp
 #include <node.h>;
 #include <v8.h>;
 #include "rainfall.h" 
@@ -244,18 +244,18 @@ If you meet those requirements, go ahead and install `node-gyp` globally on your
 ### Building the C++ addon
 Next we need to create a build file that instructs `node-gyp` on how to assemble our addon.  Create a file called `binding.gyp` in the same directory as the C++ code you have already.  
 
-```js
+```json
 {
   "targets": [
     {
       "target_name": "rainfall",
       "sources": [ "rainfall.cc" , "rainfall_node.cc" ],
       "cflags": ["-Wall", "-std=c++11"],
-      'xcode_settings': {
-        'OTHER_CFLAGS': [
-          '-std=c++11'
-        ],
-      },
+      "xcode_settings": {
+        "OTHER_CFLAGS": [
+          "-std=c++11"
+        ]
+      }
     }
   ]
 }
@@ -285,7 +285,7 @@ console.log("Average rain fall = " + rainfall.avg_rainfall(location) + "cm");
 ```
 You should be able to run it - and see that your C++ module has been called!
 
-```
+```shell
 > node rainfall.js
 Average rain fall = 1.25cm
 ```

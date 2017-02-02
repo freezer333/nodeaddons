@@ -554,7 +554,6 @@ code, pre {
 
 code {
   padding: 0 3px;
-  background-color: #f2f8fc;
   border: solid 1px #dbe7f3;
 }
 
@@ -562,13 +561,14 @@ pre {
   padding: 20px;
   overflow: auto;
   text-shadow: none;
-  background: #fff;
+  
   border: solid 1px #f2f2f2;
 }
 
 pre.inline {
   display:inline;
   margin:0px;
+  
   padding:1px;
 }
 pre code {
