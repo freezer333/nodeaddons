@@ -15,6 +15,7 @@ disqus_shortname: scottfrees
 
 This article is Part 2 of a series of posts on moving data back and forth between Node.js and C++.  In [Part 1](/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript.
 <!--more-->
+
 The JavaScript object passed into C++ looked something like this:
 
 ```json
@@ -93,10 +94,10 @@ class rain_result {
 
 As explained in [Part 1](), I'm keeping the "business" part of my C++ code completely separate from the code dealing with V8 integration.  So the class above has been added to the `rainfall.h / rainfall.cc` files.
 
-# Handling the input
+## Handling the input
 We're going to now create a new callable function for the Node addon.  So, in the rainfall_node.cc file (where we put all our V8 integration logic), I'll add a new function and register it with the module's exports.
 
-```c++
+```cpp
 void RainfallData(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
   
@@ -108,6 +109,7 @@ void RainfallData(const v8::FunctionCallbackInfo<v8::Value>& args) {
 */
 }
 ```
+
 Recall from [Part 1](), the `unpack_location` function is where I'm extracting the location (and rainfall samples) from the JavaScript arguments.  I've introduced a new function in `rainfall.h / rainfall.cc` called `calc_rain_stats` which returns a `rain_result` instance based on the `location` instance it is given.  It computes mean/median/standard deviation (see [here](https://github.com/freezer333/nodecpp-demo/blob/master/cpp/rainfall.cc) for implementation.
 
 The `RainfallData` function is exported with the addon by adding another call to `NODE_SET_METHOD` inside the `init` function in `rainfall_node.cc`.
@@ -121,16 +123,16 @@ void init(Handle <Object> exports, Handle<Object> module) {
 }
 ```
 
-# Building the JavaScript object and returning it
+## Building the JavaScript object and returning it
 After unpacking the `location` object inside the RainfallData function, we got a `rainfall_result` object:
 
-```C++
+```c++
 rain_result result = calc_rain_stats(loc);
 ```
 
 Now its time to return that - and to do so we'll create a new V8 object, transfer the rain_result data into it, and return it back to JavaScript.
 
-```C++
+```c++
 void RainfallData(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
   
@@ -157,13 +159,13 @@ void RainfallData(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
 First notice the similarities between this function and the AvgRainfall Function from Part 1. They both follow the similar pattern of creating a new variable on the V8 heap and returning it by setting the return value associated with the `args` variable passed into the function.  The difference now is that actually setting the value of the variable being returned is more complicated.  In AvgRainfall, we just created a new `Number`:
 
-```C++
+```c++
 Local<Number> retval = v8::Number::New(isolate, avg);
 ```
 
 Now, we have we instead move the data over one property at time:
 
-```C++
+```c++
 Local<Object> obj = Object::New(isolate);
 obj->Set(String::NewFromUtf8(isolate, "mean"), 
                    Number::New(isolate, result.mean));
@@ -177,16 +179,16 @@ obj->Set(String::NewFromUtf8(isolate, "n"),
 
 While its a bit more code - the object is just being built up with a series of named properties - its pretty straightforward.  
 
-# Invoking a from JavaScript
+## Invoking a from JavaScript
 Now that we've completed the C++ side, we need to rebuild our addon:
 
-```
+```shell
 > node-gyp configure build
 ```
 
 In JavaScript, we can now call both methods, and we'll see the object returned by our new data_rainfall method returns a real JavaScript object.
 
-```JavaScript
+```javascript
 //rainfall.js
 var rainfall = require("./cpp/build/Release/rainfall");
 var location = {
@@ -210,7 +212,7 @@ console.log("Standard Deviation = " + data.standard_deviation);
 console.log("N = " + data.n);
 ```
 
-```console256
+```shell
 > node rainfall.js
 Average rain fall = 1.26cm
 Mean = 1.2599999904632568
@@ -219,7 +221,7 @@ Standard Deviation = 0.6066300272941589
 N = 5
 ```
 
-# Next up...
+## Next up...
 You now have seen examples of passing simple objects back and forth between C++ and Node.js.  In the [next part](/c-processing-from-node-js-part-3-arrays) of the series, I'll look at some more complex use cases, where lists of objects and nested objects are being moved between JavaScript and the addon.
 
 By the way, if you are looking for more on Node and C++, [checkout my ebook](https://gumroad.com/l/dTVf).
