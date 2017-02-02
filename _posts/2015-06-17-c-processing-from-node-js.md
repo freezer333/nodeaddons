@@ -3,6 +3,7 @@ layout: post
 sidebar : true
 blog: true
 newsletter: true
+post_title:  "C++ Processing from Node.js"
 title:  "C++ Processing from Node.js"
 date:   2015-06-17 15:40:56
 permalink: /c-processing-from-node-js/
@@ -13,6 +14,7 @@ disqus_shortname: scottfrees
 
 I love doing high-level work in node.js, but sometimes I'm working on data analysis that needs to be done in a higher performance language.  C++ is usually a good choice for these tasks, and a great thing about node is how easy it is to move data to and from C++ with the node's addon mechanism - using the V8 API.  There's a lot of documentation on the [node](http://nodejs.org/api/addons.html) site, but I've found it hard to locate full examples where there are full data structures flowing between JavaScript and C++... so I wrote this.  
 <!--more-->
+
 In this post I'll show you how to call C++ from JavaScript, passing JavaScript objects to C++ - which are turned into first-class objects matching a C++ class definition.  I'll show you how to pass different C++ objects back to node as JavaScript objects.  I'll also show you how to pass lists of objects back and forth, along with nested class/object use-cases. **Its a big topic, I've broken it into four posts**.
 
 - **C++ processing from Node.js - An Introduction** (this post)

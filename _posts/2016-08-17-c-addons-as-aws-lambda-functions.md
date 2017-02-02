@@ -3,6 +3,7 @@ layout: post
 sidebar : true
 blog: true
 newsletter: true
+post_title:  "C++ Addons as AWS Lambda functions"
 title:  "C++ Addons as AWS Lambda functions"
 date:   2016-08-17 15:40:56
 permalink: /c-addons-as-aws-lambda-functions/

@@ -4,6 +4,7 @@ sidebar : true
 blog: true
 newsletter: true
 short: true
+post_title:  "Async Addons with Nan for the New Year (and eBook content updates)"
 title:  "Async Addons with Nan for the New Year (and eBook content updates)"
 date:   2016-01-04 15:40:56
 permalink: /async-addons-with-nan-for-the-new-year-and-ebook-content-updates/

@@ -3,6 +3,7 @@ layout: post
 sidebar : true
 blog: true
 newsletter: true
+post_title:  "Cross-platform addons with node-pre-gyp"
 title:  "Cross-platform addons with node-pre-gyp"
 date:   2017-01-21 15:40:56
 permalink: /cross-platform-addons-with-node-pre-gyp/

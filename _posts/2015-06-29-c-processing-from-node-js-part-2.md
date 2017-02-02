@@ -3,7 +3,9 @@ layout: post
 sidebar : true
 blog: true
 newsletter: true
-title:  "C++ processing from Node.js - Part 2"
+title:  "C++ processing from Node.js - Part 2 - Objects"
+post_title:  "C++ processing from Node.js"
+subtitle:  "Part 2 - Objects"
 date:   2015-06-29 15:40:56
 permalink: /c-processing-from-node-js-part-2/
 name: c-processing-from-node-js-part-2

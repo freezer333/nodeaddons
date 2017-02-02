@@ -3,6 +3,7 @@ layout: post
 sidebar : true
 blog: true
 newsletter: true
+post_title:  "Calling Native C++ DLLs from a Node.js Web App"
 title:  "Calling Native C++ DLLs from a Node.js Web App"
 date:   2015-12-29 15:40:56
 permalink: /calling-native-c-dlls-from-a-node-js-web-app/

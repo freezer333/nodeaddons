@@ -4,6 +4,8 @@ sidebar : true
 blog: true
 newsletter: true
 title:  "C++ processing from Node.js - Part 4 - Asynchronous addons"
+post_title:  "C++ processing from Node.js"
+subtitle: "Part 4 - Asynchronous addons"
 date:   2015-08-07 15:40:56
 permalink: /c-processing-from-node-js-part-4-asynchronous-addons/
 name: c-processing-from-node-js-part-4-asynchronous-addons

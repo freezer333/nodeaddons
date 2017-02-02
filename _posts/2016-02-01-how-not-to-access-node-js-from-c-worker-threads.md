@@ -3,6 +3,7 @@ layout: post
 sidebar : true
 blog: true
 newsletter: true
+post_title:  "How (not) to access V8 memory from a Node.js C++ addon's worker thread"
 title:  "How (not) to access V8 memory from a Node.js C++ addon's worker thread"
 date:   2016-02-01 15:40:56
 permalink: /how-not-to-access-node-js-from-c-worker-threads/
