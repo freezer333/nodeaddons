@@ -18,7 +18,7 @@ When we create C++ addons for Node.js, we have two strategies - synchronous or a
 
 Both of those posts (and pretty much anything else you read on the web about async addons) make the following assertion - either implicitly or explicitly:  
 
-&gt; *you can't access V8 (JavaScript) memory outside the event-loop's thread*.  
+> *you can't access V8 (JavaScript) memory outside the event-loop's thread*.  
 
 This essentially means if you want the *asynchronous* part of your addon to be able to (1) access input data sent from JavaScript and/or (2) return data to JavaScript then you need to create copies of the input/output data.  The mechanics work like this:
 
@@ -47,7 +47,7 @@ The most basic form of accessing pre-existing JavaScript variables occurs when w
 
 ![Local handles and V8 storage cells](https://raw.githubusercontent.com/freezer333/node-v8-workers/master/imgs/MemorySystem-1.png)
 
-As you can see from the diagram, the `Local&lt;Object&gt;` handle we create (`target`) will allow us to access V8 storage cells.  `Local` handles only remain valid while the `HandleScope` object active when they are created is in scope.  The [V8 Embedder's Guide](https://developers.google.com/v8/embed?hl=en) is once again the primary place to learn about `HandleScope` objects - however put simply, they are containers for handles.  At a given time, only one `HandleScope` is active within V8 (or more specifically, a V8 `Isolate`).  Where's the `HandleScope` in the above example?  Good question!  
+As you can see from the diagram, the `Local<Object>` handle we create (`target`) will allow us to access V8 storage cells.  `Local` handles only remain valid while the `HandleScope` object active when they are created is in scope.  The [V8 Embedder's Guide](https://developers.google.com/v8/embed?hl=en) is once again the primary place to learn about `HandleScope` objects - however put simply, they are containers for handles.  At a given time, only one `HandleScope` is active within V8 (or more specifically, a V8 `Isolate`).  Where's the `HandleScope` in the above example?  Good question!  
 
 It turns out that Node.js creates a `HandleScope` right before it calls our addon on the JavaScript code's behalf.  This `HandleScope` is destroyed when the C++ addon function returns.  Thus, any `Local` handle created inside our addon's function only survives until that function returns - meaning `Local` handles can never be accessed in worker threads when dealing with async addons - the worker threads clearly outlive the initial addon function call!
 
@@ -59,34 +59,34 @@ As a first experiment, lets maintain a reference to a JavaScript variable across
 **Note:** All of the source code for this post can be found [here](https://github.com/freezer333/node-v8-workers.git).  To follow along and run all the examples:
 
 ```
-&gt; git clone https://github.com/freezer333/node-v8-workers.git
+> git clone https://github.com/freezer333/node-v8-workers.git
 ```
 
 ```c++
-#include &lt;node.h&gt;
+#include <node.h>
 using namespace v8;
 
 // Stays in scope the entire time the addon is loaded.
-Persistent&lt;Object&gt; persist;
+Persistent<Object> persist;
 
-void Mutate(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void Mutate(const FunctionCallbackInfo<Value>& args) {
   Isolate * isolate = args.GetIsolate();
-  Local&lt;Object&gt; target = Local&lt;Object&gt;::New(isolate, persist);
+  Local<Object> target = Local<Object>::New(isolate, persist);
 
-  Local&lt;String&gt; key = String::NewFromUtf8(isolate, "x");
+  Local<String> key = String::NewFromUtf8(isolate, "x");
   // pull the current value of prop x out of the object
-  double current = target-&gt;ToObject()-&gt;Get(key)-&gt;NumberValue();
+  double current = target->ToObject()->Get(key)->NumberValue();
   // increment prop x by 42
-  target-&gt;Set(key, Number::New(isolate,  current + 42));
+  target->Set(key, Number::New(isolate,  current + 42));
 }
 
-void Setup(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void Setup(const FunctionCallbackInfo<Value>& args) {
 	Isolate * isolate = args.GetIsolate();
 	// Save a persistent handle to this object for later use in Mutate
-	persist.Reset(isolate, args[0]-&gt;ToObject());
+	persist.Reset(isolate, args[0]->ToObject());
 }
 
-void init(Local&lt;Object&gt; exports) {
+void init(Local<Object> exports) {
   NODE_SET_METHOD(exports, "setup", Setup);
   NODE_SET_METHOD(exports, "mutate", Mutate);
 }
@@ -96,7 +96,7 @@ NODE_MODULE(mutate, init)
 
 If you are unfamiliar with building addons, a tutorial about the build tool (`node-gyp`) and the details of how to set it up can be found [here](/c-processing-from-node-js).  
 
-Notice the two functions exposed by the addon.  The first, `Setup`, creates a (global) `Persistent` handle to the object passed in from JavaScript.  This is a pretty dubious use of global variables within an addon - it's probably a bad idea for non-trivial stuff - but this is just for demonstration.  The point is that `Persistent&lt;Object&gt; target`'s scope is **not** tied to `Setup`.
+Notice the two functions exposed by the addon.  The first, `Setup`, creates a (global) `Persistent` handle to the object passed in from JavaScript.  This is a pretty dubious use of global variables within an addon - it's probably a bad idea for non-trivial stuff - but this is just for demonstration.  The point is that `Persistent<Object> target`'s scope is **not** tied to `Setup`.
 
 The second function exposed by the addon is `Mutate`, and it simply adds 42 to `target`'s only property - `x`. Now let's look at the calling Node.js program.  
 
@@ -119,7 +119,7 @@ console.log(obj);  // should print 84
 When we run this program we'll see `obj.x` is initially 0, then 42, and then 84 when printed out.  Living proof we can hang on to V8 within our addon across invocations... we're on to something!
 
 ```
-&gt; node mutate.js
+> node mutate.js
 { x: 0 }
 { x: 42 }
 { x: 84 }
@@ -130,13 +130,13 @@ When we run this program we'll see `obj.x` is initially 0, then 42, and then 84 
 Let's simulate a use case where a worker thread spends a long time modifying data iteratively.  We'll modify the addon from above such that instead of needing JavaScript to call `Mutate`, it repeatedly changes `target`'s x value every 500ms in a worker thread.
 
 ```cpp
-#include &lt;node.h&gt;
-#include &lt;chrono&gt;
-#include &lt;thread&gt;
+#include <node.h>
+#include <chrono>
+#include <thread>
 using namespace v8;
 
 // Stays in scope the entire time the addon is loaded.
-Persistent&lt;Object&gt; persist;
+Persistent<Object> persist;
 
 void mutate(Isolate * isolate) {
 	while (true) {
@@ -144,23 +144,23 @@ void mutate(Isolate * isolate) {
 		// we need this to create a handle scope, since this
 		// function is NOT called by Node.js
 		v8::HandleScope handleScope(isolate);
-		Local&lt;String&gt; key = String::NewFromUtf8(isolate, "x");
-		Local&lt;Object&gt; target = Local&lt;Object&gt;::New(isolate, persist);
-		double current = target-&gt;ToObject()-&gt;Get(key)-&gt;NumberValue();
-		target-&gt;Set(key, Number::New(isolate,  current + 42));
+		Local<String> key = String::NewFromUtf8(isolate, "x");
+		Local<Object> target = Local<Object>::New(isolate, persist);
+		double current = target->ToObject()->Get(key)->NumberValue();
+		target->Set(key, Number::New(isolate,  current + 42));
   	}
 }
 
-void Start(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void Start(const FunctionCallbackInfo<Value>& args) {
   Isolate * isolate = args.GetIsolate();
-  persist.Reset(isolate, args[0]-&gt;ToObject());
+  persist.Reset(isolate, args[0]->ToObject());
 
   // spawn a new worker thread to modify the target object
   std::thread t(mutate, isolate);
   t.detach();
 }
 
-void init(Local&lt;Object&gt; exports) {
+void init(Local<Object> exports) {
   NODE_SET_METHOD(exports, "start", Start);
 }
 
@@ -177,7 +177,7 @@ var obj = { 	x: 0  };
 
 addon.start(obj);
 
-setInterval( () =&gt; {
+setInterval( () => {
 	console.log(obj)
 }, 1000);
 
@@ -186,7 +186,7 @@ setInterval( () =&gt; {
 If you've tried this before, you know what's coming next!
 
 ```
-&gt; node mutate.js
+> node mutate.js
 Segmentation fault: 11
 ```
 
@@ -202,18 +202,18 @@ void mutate(Isolate * isolate) {
 	while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    std::cerr &lt;&lt; "Worker thread trying to enter isolate" &lt;&lt; std::endl;
+    std::cerr << "Worker thread trying to enter isolate" << std::endl;
     v8::Locker locker(isolate);
-    isolate-&gt;Enter();
+    isolate->Enter();
 
-    std::cerr &lt;&lt; "Worker thread has entered isolate" &lt;&lt; std::endl;
+    std::cerr << "Worker thread has entered isolate" << std::endl;
     // we need this to create local handles, since this
     // function is NOT called by Node.js
     v8::HandleScope handleScope(isolate);
-    Local&lt;String&gt; key = String::NewFromUtf8(isolate, "x");
-    Local&lt;Object&gt; target = Local&lt;Object&gt;::New(isolate, persist);
-    double current = target-&gt;ToObject()-&gt;Get(key)-&gt;NumberValue();
-    target-&gt;Set(key, Number::New(isolate,  current + 42));
+    Local<String> key = String::NewFromUtf8(isolate, "x");
+    Local<Object> target = Local<Object>::New(isolate, persist);
+    double current = target->ToObject()->Get(key)->NumberValue();
+    target->Set(key, Number::New(isolate,  current + 42));
 
     // Note, the locker will go out of scope here, so the thread
     // will leave the isolate (release the lock)
@@ -224,7 +224,7 @@ void mutate(Isolate * isolate) {
 At this point, since we haven't added locking anywhere else, you might think this would have very little effect if we run our program now.  After all, there is seemingly no contention on the V8 lock, since the the worker is the only thread trying to lock it.
 
 ```
-&gt; node mutate.js
+> node mutate.js
 Worker thread trying to enter isolate
 { x: 0 }
 { x: 0 }
@@ -254,13 +254,13 @@ static void StartNodeInstance(void* arg) {
       bool more;
       do {
         v8::platform::PumpMessageLoop(default_platform, isolate);
-        more = uv_run(env-&gt;event_loop(), UV_RUN_ONCE);
+        more = uv_run(env->event_loop(), UV_RUN_ONCE);
 
         if (more == false) {
           v8::platform::PumpMessageLoop(default_platform, isolate);
           EmitBeforeExit(env);
-          more = uv_loop_alive(env-&gt;event_loop());
-          if (uv_run(env-&gt;event_loop(), UV_RUN_NOWAIT) != 0)
+          more = uv_loop_alive(env->event_loop());
+          if (uv_run(env->event_loop(), UV_RUN_NOWAIT) != 0)
             more = true;
         }
       } while (more == true);
@@ -275,16 +275,16 @@ If you look at the V8 documentation, you will find a counterpart to `Locker` tho
 
 ```cpp
 // Remember - this is called in the event loop thread
-void Start(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void Start(const FunctionCallbackInfo<Value>& args) {
 	Isolate * isolate = args.GetIsolate();
-	persist.Reset(isolate, args[0]-&gt;ToObject());
+	persist.Reset(isolate, args[0]->ToObject());
 
 	// spawn a new worker thread to modify the target object
 	std::thread t(mutate, isolate);
 	t.detach();
 
 	// This will allow the worker to enter...
-	isolate-&gt;Exit();
+	isolate->Exit();
 	v8::Unlocker unlocker(isolate);
 }
 ```
@@ -292,10 +292,10 @@ void Start(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
 Running this ends in disaster though - segmentation fault as soon as `Start` returns - the worker thread never even gets a chance.  This really should not have been a surprise.  When `Start` returns, it's relinquished the lock it had on V8 and actually exited the isolate - but this is the thread that actually runs our JavaScript - a clear conflict in logic!  The `seg fault` is a result of Node.js calling into V8 (to return control back to JavaScript) after it's exited the isolate.  If we delay the return of `Start`, we can see that the worker thread *is able to access V8 data*.
 
 ```cpp
-void Start(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void Start(const FunctionCallbackInfo<Value>& args) {
 	...
 
-  isolate-&gt;Exit();
+  isolate->Exit();
   v8::Unlocker unlocker(isolate);
 
   // as soon as we return, Node's going to access V8 which
@@ -304,7 +304,7 @@ void Start(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
 }
 ```
 ```
-&gt; node mutate.js
+> node mutate.js
 Worker thread trying to enter isolate
 Worker thread has entered isolate
 Worker thread trying to enter isolate
@@ -315,26 +315,26 @@ Worker thread has entered isolate
 In theory, we could force JavaScript to call into the addon to periodically release the isolate to allow the worker thread to access it for a while.  
 
 ```cpp
-void Start(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void Start(const FunctionCallbackInfo<Value>& args) {
 	Isolate * isolate = args.GetIsolate();
-	persist.Reset(isolate, args[0]-&gt;ToObject());
+	persist.Reset(isolate, args[0]->ToObject());
 
 	// spawn a new worker thread to modify the target object
 	std::thread t(mutate, isolate);
 	t.detach();
 }
 
-void LetWorkerWork(const FunctionCallbackInfo&lt;Value&gt; &amp;args) {
+void LetWorkerWork(const FunctionCallbackInfo<Value> &args) {
 	Isolate * isolate = args.GetIsolate();
 	{
-		isolate-&gt;Exit();
+		isolate->Exit();
   		v8::Unlocker unlocker(isolate);
 
 		// let worker execute for 200 seconds
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 	}
 	//v8::Locker locker(isolate);
-	isolate-&gt;Enter();
+	isolate->Enter();
 }
 ```
 
@@ -347,7 +347,7 @@ var obj = { 	x: 0  };
 
 addon.start(obj);
 
-setInterval( () =&gt; {
+setInterval( () => {
 	addon.let_worker_work();
 	console.log(obj)
 }, 1000);
@@ -357,7 +357,7 @@ setInterval( () =&gt; {
 As you can see - this *does work* - we an access V8 data from a worker thread while the event loop is asleep, with an `Unlocker` in scope.
 
 ```
-&gt; node mutate.js
+> node mutate.js
 Worker thread trying to enter isolate
 Worker thread has entered isolate
 Worker thread trying to enter isolate

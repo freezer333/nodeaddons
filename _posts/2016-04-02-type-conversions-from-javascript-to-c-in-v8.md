@@ -23,7 +23,7 @@ As you go through the API for working with primitives, you'll notice there is no
 
 1. JavaScript primitives are *immutable* - variables "containing" primitives are just pointing to unchanging V8 storage cells.  Assignment of a `var x = 5;` makes `x` point to a storage cell with 5 in it - reassigning `x = 6` does not change this storage cell - it simply makes `x` point to another storage cell that contains 6.  If `x` and `y` are both assigned the value of `10`, they both point to the same storage cell.  
 2. Function calls are pass-by-value, so whenever JavaScript calls a C++ addon with a parameter - if that parameter is a primitive, it is always a distinct *copy* - changing it's value has no effect in the calling code.
-3. Handles (`Local&lt;Value&gt;`) are references to *storage cells*.  Thus, given #1 above, it doesn't make sense to allow handle values to change - since primitives don't change!
+3. Handles (`Local<Value>`) are references to *storage cells*.  Thus, given #1 above, it doesn't make sense to allow handle values to change - since primitives don't change!
 
 Hopefully that makes some sense - however it's still likely you'll need to *modify* V8 variables... we'll just need to do this by *creating* new ones and assigning the new value to them.
 
@@ -31,14 +31,14 @@ Hopefully that makes some sense - however it's still likely you'll need to *modi
 Now let's look at the Number primitive type and what happens when we construct a C++ addon to accept them from JavaScript.  I've built an addon that exposes the following C++ function as an export called `pass_number`:
 
 ```c++
-void PassNumber(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void PassNumber(const FunctionCallbackInfo<Value>& args) {
     Isolate * isolate = args.GetIsolate();
 
-    double value = args[0]-&gt;NumberValue();
+    double value = args[0]->NumberValue();
 
     value+= 42;
 
-    Local&lt;Number&gt; retval = Number::New(isolate, value);
+    Local<Number> retval = Number::New(isolate, value);
 
     args.GetReturnValue().Set(retval);
 }
@@ -81,17 +81,17 @@ describe('pass_number()', function () {
 I've created a [repository](https://github.com/freezer333/nodecpp-demo/tree/master/conversions) which has a type conversion cheat sheet that I think is pretty useful.  To get it:
 
 ```
-&gt; git clone https://github.com/freezer333/nodecpp-demo.git
+> git clone https://github.com/freezer333/nodecpp-demo.git
 ```
 
 To build both addons, go into the `loose` and `strict` directories and issue a `node-gyp configure build` command in each.  You'll need to have installed `node-gyp` globally first.  If your completely new to this - [check this out](/c-processing-from-node-js).
 
 ```
-&gt; cd nodecpp-demo/conversion/loose
-&gt; node-gyp configure build
+> cd nodecpp-demo/conversion/loose
+> node-gyp configure build
 ...
-&gt; cd ../strict
-&gt; node-gyp configure build
+> cd ../strict
+> node-gyp configure build
 ```
 
 The two addons (loose and strict) expose a series of functions that accept different types - Numbers, Integers, Strings, Booleans, Objects, and Arrays - and perform (somewhat silly) operations on them before returning a value.  I've included a JavaScript test program that shows you the expected outputs of each function - but the real learning value is in the addons' C++ code ([strict](https://github.com/freezer333/nodecpp-demo/blob/master/conversions/loose/loose_type_demo.cpp)/[loose](https://github.com/freezer333/nodecpp-demo/blob/master/conversions/strict/strict_type_demo.cpp))
@@ -99,7 +99,7 @@ The two addons (loose and strict) expose a series of functions that accept diffe
 To run the tests (you'll need `mocha` installed), go into the `conversions` directory (with `index.js`):
 
 ```
-&gt; npm test
+> npm test
 ```
 
 The 'loose' addon has very little type checking - it's basically mimicking how a pure JavaScript function would work.  For example, the `pass_string` function accepts anything that could be converted to a string in JavaScript and returns the reverse of it:
@@ -134,14 +134,14 @@ describe('pass_string()', function () {
 Here's the C++ code for the loose conversions of string input:
 
 ```c++
-void PassString(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void PassString(const FunctionCallbackInfo<Value>& args) {
     Isolate * isolate = args.GetIsolate();
 
     v8::String::Utf8Value s(args[0]);
     std::string str(*s);
     std::reverse(str.begin(), str.end());    
 
-    Local&lt;String&gt; retval = String::NewFromUtf8(isolate, str.c_str());
+    Local<String> retval = String::NewFromUtf8(isolate, str.c_str());
     args.GetReturnValue().Set(retval);
 }
 ```
@@ -170,19 +170,19 @@ describe('pass_string()', function () {
 ```
 
 ```c++
-void PassString(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void PassString(const FunctionCallbackInfo<Value>& args) {
     Isolate * isolate = args.GetIsolate();
 
-    if ( args.Length() &lt; 1 ) {
+    if ( args.Length() < 1 ) {
         return;
     }
-    else if ( args[0]-&gt;IsNull() ) {
+    else if ( args[0]->IsNull() ) {
         return;
     }
-    else if ( args[0]-&gt;IsUndefined() ) {
+    else if ( args[0]->IsUndefined() ) {
         return;
     }
-    else if (!args[0]-&gt;IsString()) {
+    else if (!args[0]->IsString()) {
         // This clause would catch IsNull and IsUndefined too...
         return ;
     }
@@ -191,7 +191,7 @@ void PassString(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
     std::string str(*s);
     std::reverse(str.begin(), str.end());    
 
-    Local&lt;String&gt; retval = String::NewFromUtf8(isolate, str.c_str());
+    Local<String> retval = String::NewFromUtf8(isolate, str.c_str());
     args.GetReturnValue().Set(retval);
 }
 ```

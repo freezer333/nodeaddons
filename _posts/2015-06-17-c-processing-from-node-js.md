@@ -24,13 +24,13 @@ In this post I'll show you how to call C++ from JavaScript, passing JavaScript o
 
 Once you've looked at this series, there's still a lot more to learn about using C++ within Node.js - topics like wrapping existing C++ objects, working with multiple versions of the V8 API, and deployment on different platforms.  If you are looking for a manual that goes over all this and more, check out my [ebook on this topic](/book/) - it's a great shortcut!  You can [buy the ebook here](https://gumroad.com/l/dTVf).
 
-# Integration Pattern
+## Integration Pattern
 I've chosen to handle objects in a way that minimizes the impact of the actual C++ code called by node.  This means that I did *not* employ the V8 class wrapping strategies, instead electing to code all transfer between V8 data types and C++ classes myself, in separate functions.  I like this method, because it keeps the V8 code isolated - and works when you don't want to directly mess with existing C++ code you are calling from node.  If you are looking to have a more automatic method of mapping V8 to C++ data structures, see this [excellent article](http://code.tutsplus.com/tutorials/writing-nodejs-addons--cms-21771), along with the [Node.js documentation](http://nodejs.org/api/addons.html#addons_wrapping_c_objects). 
 
-# Node Version
+## Node Version
 The code presented is based on Node.js v0.12 and above.  Node v0.12 integrated a new version of the V8 JavaScript engine, which contained a lot of API breaking changes to C++ integration.  Read more about it [here](https://strongloop.com/strongblog/node-js-v0-12-c-apis-breaking/).  **If you aren't using Node v0.12 and above, some of this code won't work for you!**
 
-# Background - Data Schema
+## Background - Data Schema
 I'm going to create a node program sends a json object containing rain fall sample data to C++ for processing.  The sample data contains a list of `locations`, marked by their latitude and longitude.  Each `location` also has a list of `samples` containing the date when the measurement was taken and the amount of rainfall in cm.  Below is an example.  
 
 *Note - you can find all the source code for this post [on github, here](https://github.com/freezer333/nodecpp-demo)*.
@@ -79,7 +79,7 @@ I'm going to create a node program sends a json object containing rain fall samp
 ```
 The JavaScript code will call a C++ addon to calculate average and median rainfall for each location.  *Yes, I know average/median is not exactly a "heavy compute" task - this is just for show*.  In Part 1 of this tutorial, I'll just pass one location to C++ (with several rainfall samples) and C++ will just return the average as a simple numeric value.  
 
-# Creating the C++ addon
+## Creating the C++ addon
 We'll create the logic / library by defining simple C++ classes to represent locations and samples, and a function to calculate the average rainfall for a given location.  
 
 ```c++
@@ -95,45 +95,45 @@ class location {
 public:
   double longitude;
   double latitude;
-  vector&lt;sample&gt; samples;
+  vector<sample> samples;
 };
 
 // Will return the average (arithmetic mean) rainfall for the give location
-double avg_rainfall(location &amp; loc); // code in rainfall.cc
+double avg_rainfall(location & loc); // code in rainfall.cc
 ```
 If you download the [source from github](https://github.com/freezer333/nodecpp-demo) you can see the implementation along with a simple test program.  Everything related to the C++ code and building the addon is in a directory called `/cpp`.
 
 Now we need to make this code available to Node.js by building it as an addon.
 
-## Creating the V8 entry point code
+### Creating the V8 entry point code
 To expose our C++ "library" as a node.js addon we build some wrapper code.  The [Node.js official documentation](http://nodejs.org/api/addons.html) has some very good explanation of the basics to this.  
 
 We need to create a new .cc file (I called it `rainfall_node.cc`), which includes
 the `node.h` and `v8.h` headers.  Next, we need to define an entry point for our addon - which is achieved by creating a function and registering it via a macro provided by the node/v8 headers.
 
 ```cc
-#include &lt;node.h&gt;
-#include &lt;v8.h&gt;
+#include <node.h>;
+#include <v8.h>;
 #include "rainfall.h" 
 
 using namespace v8;
 
-void init(Handle &lt;Object&gt; exports, Handle&lt;Object&gt; module) {
+void init(Handle <Object> exports, Handle<Object> module) {
  // we'll register our functions to make them callable from node here..
 }
 
 // associates the module name with initialization logic
 NODE_MODULE(rainfall, init)  
 ```
-In the `init` function (we can name it anything, as long as we associate it in the NODE_MODULE macro) we will define which functions are going to be exposed to Node.js when are module is included/required.  As you will see, the wrapper code to do all this gets a little ugly, which is why I think its important to keep your clean C++ code (the rainfall.h/cc files) separate from all this.
+In the `init` function (we can name it anything, as long as we associate it in the `NODE_MODULE` macro) we will define which functions are going to be exposed to Node.js when are module is included/required.  As you will see, the wrapper code to do all this gets a little ugly, which is why I think its important to keep your clean C++ code (the rainfall.h/cc files) separate from all this.
 
 So the first thing I'll do is expose the `avg_rainfall` method from rainfall.h by creating a new function in `rainfall_node.cc`.
 
 ```cpp
-void AvgRainfall(const v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args) {
+void AvgRainfall(const v8::FunctionCallbackInfo<v8::Value> & args) {
   Isolate* isolate = args.GetIsolate();
 
-  Local&lt;Number&gt; retval = v8::Number::New(isolate, 0);
+  Local<Number> retval = v8::Number::New(isolate, 0);
   args.GetReturnValue().Set(retval)
 }
 ```
@@ -144,7 +144,7 @@ The return value is set at the last line of the function (note, its a `void` fun
 Now lets make this function callable from node, by registering it within the `init` function from earlier.
 
 ```cpp
-void init(Handle &lt;Object&gt; exports, Handle&lt;Object&gt; module) {
+void init(Handle <Object> exports, Handle<Object> module) {
   NODE_SET_METHOD(exports, "avg_rainfall", AvgRainfall);
 }
 ```
@@ -152,8 +152,8 @@ The init function is called when the module is first loaded in a node applicatio
 
 Much of what I've covered so far can be found in the standard Node tutorials.  Now its time to modify the `AvgRainfall` wrapper code so it can accept JavaScript objects (`location`) and transform them into the C++ versions in order to actually call the **actual** average rainfall function we defined originally in `rainfall.cc`.
 
-### Mapping JavaScript object to C++ class
-The `const v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args` input parameter represents a collection of all arguments passed by JavaScript when the `AvgRainfall` function is called.  I'll explain how this is setup later - but for example, you might have the following JavaScript code:
+#### Mapping JavaScript object to C++ class
+The `const v8::FunctionCallbackInfo<v8::Value> & args` input parameter represents a collection of all arguments passed by JavaScript when the `AvgRainfall` function is called.  I'll explain how this is setup later - but for example, you might have the following JavaScript code:
 
 ```js
 var rainfall = require("rainfall");
@@ -169,36 +169,36 @@ console.log("Average rain fall = " + rainfall.avg_rainfall(location) + "cm");
 To do this, we need some additional code to extract the object properties and instantiate C++ objects.  I'll pack this transfer code into a separate function called within the newly revised `AvgRainfall` function:
 
 ```cpp
-void AvgRainfall(const v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args) {
+void AvgRainfall(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
   
   location loc = unpack_location(isolate, args);
   double avg = avg_rainfall(loc);
 
-  Local&lt;Number&gt; retval = v8::Number::New(isolate, avg);
+  Local<Number> retval = v8::Number::New(isolate, avg);
   args.GetReturnValue().Set(retval);
 }
 ```
 The `unpack_location` function accepts the VM instance and the argument list, and unpacks the V8 object into a new `location` object - and returns it.
 
 ```cpp
-location unpack_location(Isolate * isolate, const v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args) {
+location unpack_location(Isolate * isolate, const v8::FunctionCallbackInfo<v8::Value>& args) {
   location loc;
-  Handle&lt;Object&gt; location_obj = Handle&lt;Object&gt;::Cast(args[0]);
-  Handle&lt;Value&gt; lat_Value = 
-                location_obj-&gt;Get(String::NewFromUtf8(isolate,"latitude"));
-  Handle&lt;Value&gt; lon_Value = 
-                location_obj-&gt;Get(String::NewFromUtf8(isolate,"longitude"));
-  loc.latitude = lat_Value-&gt;NumberValue();
-  loc.longitude = lon_Value-&gt;NumberValue();
+  Handle<Object> location_obj = Handle<Object>::Cast(args[0]);
+  Handle<Value> lat_Value = 
+                location_obj->Get(String::NewFromUtf8(isolate,"latitude"));
+  Handle<Value> lon_Value = 
+                location_obj->Get(String::NewFromUtf8(isolate,"longitude"));
+  loc.latitude = lat_Value->NumberValue();
+  loc.longitude = lon_Value->NumberValue();
 
-  Handle&lt;Array&gt; array =  Handle&lt;Array&gt;::Cast(
-                        location_obj-&gt;Get(
+  Handle<Array> array =  Handle<Array>::Cast(
+                        location_obj->Get(
                               String::NewFromUtf8(isolate,"samples")));
 
-  int sample_count = array-&gt;Length();
-  for ( int i = 0; i &lt; sample_count; i++ ) {
-    sample s = unpack_sample(isolate, Handle&lt;Object&gt;::Cast(array-&gt;Get(i)));
+  int sample_count = array->Length();
+  for ( int i = 0; i < sample_count; i++ ) {
+    sample s = unpack_sample(isolate, Handle<Object>::Cast(array->Get(i)));
     loc.samples.push_back(s);
   }
   return loc;
@@ -207,28 +207,28 @@ location unpack_location(Isolate * isolate, const v8::FunctionCallbackInfo&lt;v8
 The `unpack_sample` function is similar - this is all a matter of unpacking the data from V8's data types.  
 
 ```cpp
-sample unpack_sample(Isolate * isolate, const Handle&lt;Object&gt; sample_obj) {
+sample unpack_sample(Isolate * isolate, const Handle<Object> sample_obj) {
   sample s;
-  Handle&lt;Value&gt; date_Value = 
-               sample_obj-&gt;Get(String::NewFromUtf8(isolate, "date"));
-  Handle&lt;Value&gt; rainfall_Value = 
-              sample_obj-&gt;Get(String::NewFromUtf8(isolate, "rainfall"));
+  Handle<Value> date_Value = 
+               sample_obj->Get(String::NewFromUtf8(isolate, "date"));
+  Handle<Value> rainfall_Value = 
+              sample_obj->Get(String::NewFromUtf8(isolate, "rainfall"));
 
   v8::String::Utf8Value utfValue(date_Value);
   s.date = std::string(*utfValue);
  
   // Unpack the numeric rainfall amount directly from V8 value
-  s.rainfall = rainfall_Value-&gt;NumberValue();
+  s.rainfall = rainfall_Value->NumberValue();
   return s;
 }
 ```
 
-## Installing node-gyp
+### Installing node-gyp
 To create a C++ addon we'll need to compile/package the .cc/.h files using `node-gyp`.  As discussed [here](http://www.benfarrell.com/2013/01/03/c-and-node-js-an-unholy-combination-but-oh-so-right/), you don't want to be using the deprecated WAF tools for this step.
 
 You can find a lot more detail about `node-gyp` on [the project's site](https://github.com/TooTallNate/node-gyp).
 
-&gt;node-gyp is a cross-platform command-line tool written in Node.js for compiling native addon modules for Node.js. It bundles the gyp project used by the Chromium team and takes away the pain of dealing with the various differences in build platforms. 
+> node-gyp is a cross-platform command-line tool written in Node.js for compiling native addon modules for Node.js. It bundles the gyp project used by the Chromium team and takes away the pain of dealing with the various differences in build platforms. 
 
 Installing it is easy - but before executing the following make sure you have the following already installed on your machine:
 
@@ -239,9 +239,9 @@ Installing it is easy - but before executing the following make sure you have th
 If you meet those requirements, go ahead and install `node-gyp` globally on your system.
 
 ```console256
-&gt; npm install -g node-gyp
+> npm install -g node-gyp
 ```
-## Building the C++ addon
+### Building the C++ addon
 Next we need to create a build file that instructs `node-gyp` on how to assemble our addon.  Create a file called `binding.gyp` in the same directory as the C++ code you have already.  
 
 ```js
@@ -265,11 +265,11 @@ This is just a json file with a collection of properties.  The target name is yo
 With this is place, you can build your module:
 
 ```
-&gt; node-gyp configure build
+> node-gyp configure build
 ```
 If all goes well here you will have a `/build/Release` folder created right alongside your C++ code files.  Within that folder, there should be a `rainfall.node` output file.  **This is your addon**... ready to be required from node.
 
-# Node.js app
+## Node.js app
 Below is the same JavaScript listing from above, with the only change being the require call - which is a little ugly because we are requiring a local package (I'll explain how to package this for npm usage in another post).  Create this file (rainfall.js) in the directory **above** the cpp folder containing your C++ source code.
 
 ```js
@@ -286,11 +286,11 @@ console.log("Average rain fall = " + rainfall.avg_rainfall(location) + "cm");
 You should be able to run it - and see that your C++ module has been called!
 
 ```
-&gt; node rainfall.js
+> node rainfall.js
 Average rain fall = 1.25cm
 ```
 
-# Next up...
+## Next up...
 We now have a fully functional node app calling C++.  We've successfully transformed a single JavaScript object into a C++ object.  In [Part 2](/c-processing-from-node-js-part-2) of this series, I'll expand on this example so the C++ code returns a full "result" object - along the lines of the class defined below.
 
 ```c++

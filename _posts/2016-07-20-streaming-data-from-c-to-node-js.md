@@ -79,24 +79,24 @@ Up next, let's create the `binding.gyp` file.  If you are foggy on addon develop
       "cflags!": [ '-fno-exceptions' ],
       "cflags_cc!": [ '-fno-exceptions' ],
       "include_dirs" : [
-		"&lt;!(node -e \"require('nan')\")", 
-		"&lt;!(node -e \"require('streaming-worker-sdk')\")"
+		"<!(node -e \"require('nan')\")", 
+		"<!(node -e \"require('streaming-worker-sdk')\")"
 		]
     }
   ]
 }
 ``` 
 
-Note above we're going to create the C++ addon code in `sensor_sim.cpp` (sources).  The most important part though is the `include_dirs`.  When we compile the addon, we'll be depending on NAN and the streaming SDK.  The package.json file from earlier will instruct npm to download NAN and `streaming-worker-sdk` from the npm registry.  Unlike normal modules, these aren't JS code - they are C++ headers, but they will be placed in `node_modules` nonetheless.  The `&lt;!(node -e \"require`... magic is instructing node-gyp to include the actual directories of those modules in the build path.
+Note above we're going to create the C++ addon code in `sensor_sim.cpp` (sources).  The most important part though is the `include_dirs`.  When we compile the addon, we'll be depending on NAN and the streaming SDK.  The package.json file from earlier will instruct npm to download NAN and `streaming-worker-sdk` from the npm registry.  Unlike normal modules, these aren't JS code - they are C++ headers, but they will be placed in `node_modules` nonetheless.  The `<!(node -e \"require`... magic is instructing node-gyp to include the actual directories of those modules in the build path.
 
 ## C++ Sensor code 
 Now let's create the `sensor_sim.cpp` file.  We'll start out by including the basic headers/libs we'll need to get off the ground.
 
 ```cpp
-#include &lt;iostream&gt;
-#include &lt;chrono&gt;
-#include &lt;random&gt;
-#include &lt;thread&gt;
+#include <iostream>
+#include <chrono>
+#include <random>
+#include <thread>
 #include "streaming-worker.h"
 #include "json.hpp"  //https://github.com/nlohmann/json
 
@@ -124,15 +124,15 @@ All streaming addons using `streaming-worker-sdk` are implemented as a class, ex
 class Sensor : public StreamingWorker {
   public:
     Sensor(Callback *data, Callback *complete, 
-		Callback *error_callback,  v8::Local&lt;v8::Object&gt; &amp; options) 
+		Callback *error_callback,  v8::Local<v8::Object> & options) 
           : StreamingWorker(data, complete, error_callback){
 
       // name is a member variable in Sensor
       name = "default sensor";
       // interrogate the options object to see if there is a "name" property
-      if (options-&gt;IsObject() ) {
-        v8::Local&lt;v8::Value&gt; name_ = options-&gt;Get(New&lt;v8::String&gt;("name").ToLocalChecked());
-        if ( name_-&gt;IsString() ) {
+      if (options->IsObject() ) {
+        v8::Local<v8::Value> name_ = options->Get(New<v8::String>("name").ToLocalChecked());
+        if ( name_->IsString() ) {
           v8::String::Utf8Value s(name_);
           name = *s;
         }
@@ -163,9 +163,9 @@ Here's our `Execute` implementation for `Sensor`, which sits in a loop and gener
 ```cpp
 
 // member of Sensor
-void Execute (const AsyncProgressWorker::ExecutionProgress&amp; progress) {
+void Execute (const AsyncProgressWorker::ExecutionProgress& progress) {
    std::random_device rd;
-   std::uniform_real_distribution&lt;double&gt; pos_dist(-1.0, 1.0);
+   std::uniform_real_distribution<double> pos_dist(-1.0, 1.0);
    while (!closed()) {
       json sample;
       sample["sensor"] = name;
@@ -190,7 +190,7 @@ Our final step is implementing afactory function declared - but not defined - in
 
 ```cpp
 StreamingWorker * create_worker(Callback *data, Callback *complete
-    , Callback *error_callback, v8::Local&lt;v8::Object&gt; &amp; options) {
+    , Callback *error_callback, v8::Local<v8::Object> & options) {
 
   return new Sensor(data, complete, error_callback, options);
 }

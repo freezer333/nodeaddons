@@ -100,15 +100,15 @@ Note that the dependencies include [`NAN`](https://github.com/nodejs/nan) and th
       "cflags!": [ '-fno-exceptions' ],
       "cflags_cc!": [ '-fno-exceptions' ],
       "include_dirs" : [
-		"&lt;!(node -e \"require('nan')\")", 
-		"&lt;!(node -e \"require('streaming-worker-sdk')\")"
+		"<!(node -e \"require('nan')\")", 
+		"<!(node -e \"require('streaming-worker-sdk')\")"
 		]
     }
   ]
 }
 ``` 
 
-Note above we're going to create the C++ addon code in `accumulator.cpp` (sources).  The most important part though is the `include_dirs`.  When we compile the addon, we'll be depending on NAN and the streaming SDK.  The package.json file from earlier will instruct npm to download NAN and `streaming-worker-sdk` from the npm registry.  Unlike normal modules, these aren't JS code - they are C++ headers, but they will be placed in `node_modules` nonetheless.  The `&lt;!(node -e \"require`... magic is instructing node-gyp to include the actual directories of those modules in the build path.
+Note above we're going to create the C++ addon code in `accumulator.cpp` (sources).  The most important part though is the `include_dirs`.  When we compile the addon, we'll be depending on NAN and the streaming SDK.  The package.json file from earlier will instruct npm to download NAN and `streaming-worker-sdk` from the npm registry.  Unlike normal modules, these aren't JS code - they are C++ headers, but they will be placed in `node_modules` nonetheless.  The `<!(node -e \"require`... magic is instructing node-gyp to include the actual directories of those modules in the build path.
 
 
 
@@ -117,12 +117,12 @@ Note above we're going to create the C++ addon code in `accumulator.cpp` (source
 Inside `accumulator.cpp` we now need to create a class that extends `StreamingWorker` from the `streaming-worker-sdk`.  In it's constructor, we pass along the callbacks that will be created by the other half of the application (JavaScript) and initialize a `sum` variable where we'll accumulate our data.
 
 ``` cpp
-#include &lt;nan.h&gt;
-#include &lt;string&gt;
-#include &lt;algorithm&gt;
-#include &lt;iostream&gt;
-#include &lt;chrono&gt;
-#include &lt;thread&gt;
+#include <nan.h>
+#include <string>
+#include <algorithm>
+#include <iostream>
+#include <chrono>
+#include <thread>
 #include "streaming-worker.h"
 
 using namespace std;
@@ -130,26 +130,26 @@ class Accumulate : public StreamingWorker {
   public:
     Accumulate(Callback *data, Callback *complete, 
         Callback *error_callback, 
-        v8::Local&lt;v8::Object&gt; &amp; options) 
+        v8::Local<v8::Object> & options) 
         : StreamingWorker(data, complete, error_callback){
 
         sum = 0;
     }
     ~Accumulate(){}
 
-    void Execute (const AsyncProgressWorker::ExecutionProgress&amp; progress) {
+    void Execute (const AsyncProgressWorker::ExecutionProgress& progress) {
       int value ;
       do {
         Message m = fromNode.read();
         value = std::stoi(m.data);
-        if ( value &gt; 0 ){
+        if ( value > 0 ){
             sum += value;
         }
         else {
             Message tosend("sum", std::to_string(sum));
             writeToNode(progress, tosend);
         }
-      } while (value &gt; 0);
+      } while (value > 0);
     }
   private:
     int sum;
@@ -176,7 +176,7 @@ At the bottom of  `accumulator.cpp` we must also include two functions to setup 
 ```cpp
 StreamingWorker * create_worker(Callback *data
     , Callback *complete
-    , Callback *error_callback, v8::Local&lt;v8::Object&gt; &amp; options) {
+    , Callback *error_callback, v8::Local<v8::Object> & options) {
  return new Accumulate(data, complete, error_callback, options);
 }
 

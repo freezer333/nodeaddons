@@ -16,10 +16,10 @@ In this post I'm going to walk you through creating and deploying a Node.js AWS 
 ## What is AWS Lambda?
 Quoting directly from AWS, 
 
-&gt; AWS Lambda is a compute service where you can upload your code to AWS Lambda and the service can run the code on your behalf using AWS infrastructure. After you upload your code and create what we call a Lambda function, AWS Lambda takes care of provisioning and managing the servers that you use to run the  code. You can use AWS Lambda as follows:
+> AWS Lambda is a compute service where you can upload your code to AWS Lambda and the service can run the code on your behalf using AWS infrastructure. After you upload your code and create what we call a Lambda function, AWS Lambda takes care of provisioning and managing the servers that you use to run the  code. You can use AWS Lambda as follows:
 
-&gt; - As an event-driven compute service where AWS Lambda runs your code in response to events, such as changes to data in an Amazon S3 bucket or an Amazon DynamoDB table.
-&gt; - As a compute service to run your code in response to HTTP requests using Amazon API Gateway or API calls made using AWS SDKs.
+> - As an event-driven compute service where AWS Lambda runs your code in response to events, such as changes to data in an Amazon S3 bucket or an Amazon DynamoDB table.
+> - As a compute service to run your code in response to HTTP requests using Amazon API Gateway or API calls made using AWS SDKs.
 
 Lambda is a cool platform, but it only supports a few languages - Java, Node.js, and Python.  So... what if you want to expose some C++ code using Lambda?  Well, you can certainly link Java to C++ libraries, and Python can do the same.  In the Node.js world, the way we typically integrate C++ with JavaScript is through addons.  Node.js C++ addons are compiled (native) Node.js modules which are directly callable from JavaScript as any other Node.js module.  
 
@@ -50,25 +50,25 @@ At the time of this writing, AWS Lambda supports Node.js 0.10 and 4.3,  You shou
 
 
 ```
-&gt; curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-&gt; source ~/.profile
+> curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+> source ~/.profile
 ```
 
 Now install Node.js 4.3 and install `node-gyp` while you are at it.
 
 ```
-&gt; nvm install 4.3
-&gt; npm install -g node-gyp
+> nvm install 4.3
+> npm install -g node-gyp
 ```
 
 ### Requirement 4:  C++ build tools (C++11)
 When you are doing Node.js addon development for Node.js v4+, you must use a compiler that supports C++ 11.  Recent versions of Visual Studio (Windows) and XCode (Mac OS X) all will due - but since we need to build on Linux, we just need to make sure we install g++ 4.7 or above.  Here's how you'd install g++ 4.9 on Mint/Ubuntu:
 
 ```
-&gt; sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-&gt; sudo apt-get update
-&gt; sudo apt-get install g++-4.9
-&gt; sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
+> sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+> sudo apt-get update
+> sudo apt-get install g++-4.9
+> sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
 ```
 
 If you already have an older version of g++ on your machine, you'll need to make sure you set things up so 4.9 is now used (see [here](http://www.techerina.com/2015/04/installing-upgrading-gcc-in-ubuntu-linuxmint-machine.html) for some more details).
@@ -80,9 +80,9 @@ We're actually going to actually create two Node.js projects.  One will be the C
 Lets start first with the addon.
 
 ```
-&gt; mkdir lambda-cpp
-&gt; mkdir lambda-cpp/addon
-&gt; cd lambda-cpp/addon
+> mkdir lambda-cpp
+> mkdir lambda-cpp/addon
+> cd lambda-cpp/addon
 ```
 
 To create the addon, we need three files - our C++ source, a `package.json` to tell Node.js how to deal with this addon, and a `binding.gyp` file to handle the build process.  We're creating a super simple addon here - I'll skip most of the discussion.  Again, if you are looking for more details on addon development in general - check out my [other posts](/c-processing-from-node-js) and [my book](/book/).
@@ -109,7 +109,7 @@ Now let's create `package.json`, which must be setup so it defines the entry poi
   "version": "1.0.0",
   "main": "./build/Release/average",
   "gypfile": true,
-  "author": "Scott Frees &lt;scott.frees@gmail.com&gt; (http://scottfrees.com/)",
+  "author": "Scott Frees <scott.frees@gmail.com> (http://scottfrees.com/)",
   "license": "ISC"  
 }
 ```
@@ -119,28 +119,28 @@ The key thing here is the `main` property, it's telling Node.js that the eventua
 Now the source code...  Lets open up `average.cpp` and create a simple addon function that returns the average of any/all numeric parameters it is sent (we don't need to limit the code to just three!).
 
 ```cpp
-#include &lt;node.h&gt;
+#include <node.h>
 
 using namespace v8;
 
-void Average(const FunctionCallbackInfo&lt;Value&gt;&amp; args) {
+void Average(const FunctionCallbackInfo<Value>& args) {
     Isolate * isolate = args.GetIsolate();
     double sum = 0;
     int count = 0;
     
-    for (int i = 0; i &lt; args.Length(); i++){
-    	if ( args[i]-&gt;IsNumber()) {
-    		sum += args[i]-&gt;NumberValue();
+    for (int i = 0; i < args.Length(); i++){
+    	if ( args[i]->IsNumber()) {
+    		sum += args[i]->NumberValue();
     		count++;
     	}
     }
     
-    Local&lt;Number&gt; retval = Number::New(isolate, sum / count);
+    Local<Number> retval = Number::New(isolate, sum / count);
     args.GetReturnValue().Set(retval);
 }
 
 
-void init(Local&lt;Object&gt; exports) {
+void init(Local<Object> exports) {
   NODE_SET_METHOD(exports, "average", Average);
 }
 
@@ -179,9 +179,9 @@ Now let's actually create the AWS Lambda handler.   As you (probably) already kn
 While I could do this right in the `addon` directory (requiring the addon using the relative path to the `average.node` binary), I prefer to create this as a distinct Node.js program - and pull in the local addon as an `npm` dependency. Let's create a new directory along side the `lambda-cpp/addon` directory called `lambda-cpp/lambda`.
 
 ```
-&gt; cd ..
-&gt; mkdir lambda
-&gt; cd lambda
+> cd ..
+> mkdir lambda
+> cd lambda
 ```
 
 Here's the handler code - which you should put in `index.js`:
@@ -201,7 +201,7 @@ Note that we've required `average` as if it were an external dependency.  Let's 
   "name": "lambda-demo",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Scott Frees &lt;scott.frees@gmail.com&gt; (http://scottfrees.com/)",
+  "author": "Scott Frees <scott.frees@gmail.com> (http://scottfrees.com/)",
   "license": "ISC", 
   "dependencies": {
     "average": "file:../addon"
@@ -244,7 +244,7 @@ module.exports = {
 Now we can execute our lambda locally with the following command:
 
 ```
-&gt; lambda-local -l index.js -h averageHandler -e sample.js
+> lambda-local -l index.js -h averageHandler -e sample.js
 Logs
 ------
 START RequestId: 33711c24-01b6-fb59-803d-b96070ccdda5
@@ -268,15 +268,15 @@ Assuming you have an Administrator AWS user account, you need to grab an Access 
 Once you have your access keys, you need to install the CLI.  There are a few ways to do this, and it requires Python to be installed on your machine.  The most straight foward install (IMO) is the Bundled Installer:
 
 ```
-&gt; curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-&gt; unzip awscli-bundle.zip
-&gt; sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+> curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+> unzip awscli-bundle.zip
+> sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 ```
 
-Next, you'll need to configure the CLI.  Type `aws configure` and enter your access key and secret key downloaded a moment ago.  You can also choose a default region and output format.  You probably should attach a profile to this configuration (you'll need it later) using the --profile &lt;profile name&gt; argument.
+Next, you'll need to configure the CLI.  Type `aws configure` and enter your access key and secret key downloaded a moment ago.  You can also choose a default region and output format.  You probably should attach a profile to this configuration (you'll need it later) using the --profile <profile name> argument.
 
 ```
-&gt; aws configure --profile lambdaProfile
+> aws configure --profile lambdaProfile
 AWS Access Key ID [None]: XXXXXXXXX
 AWS Secret Access Key [None]: XXXXXXXXXXXXXXXXXXXX
 Default region name [None]: us-west-2
@@ -286,7 +286,7 @@ Default output format [None]:
 You can verify that you've set this all up correctly by listing your Lambda functions:
 
 ```
-&gt; aws lambda list-functions
+> aws lambda list-functions
 {
     "Functions": []
 }
@@ -294,7 +294,7 @@ You can verify that you've set this all up correctly by listing your Lambda func
 
 Of course, if you just created this account, you won't have any functions - but you shouldn't see any errors at this point at least.
 
-### Packaging the Lambda Function &amp; Addon
+### Packaging the Lambda Function & Addon
 The most crucial (and judging by questions online, often overlooked) step in this process is now to ensure the *entire* module makes its way into a zip file correctly - which we can deploy to Lambda.  Here's the most important things to remember:
 
 1. The `index.js` file must be at the top (root) of the zip file's hierarchy.  You should not zip the `/lambda-addon/lambda` folder itself - just it's contents.  In other words, if you uzip the zip file you create, index.js should NOT be in a directory.
@@ -304,7 +304,7 @@ The most crucial (and judging by questions online, often overlooked) step in thi
 Inside the directory containing `index.js`, zip up all the files that should be deployed.  I'll put the zip in the `lambda-addon` parent directory.
 
 ```
-&gt; zip -r ../average.zip node_modules/ average.cpp index.js binding.gyp package.json 
+> zip -r ../average.zip node_modules/ average.cpp index.js binding.gyp package.json 
 ```
 **Note the -r ** - you need to entire `node_modules` directory.  Verify the package with `less`.  You should see something along the lines of this:
 
@@ -352,7 +352,7 @@ If you don't see contents of the `node_modules` directory inside the zip, or if 
 Now we can can create the Lambda function using the `lambda create-function` command.  Make sure you update the region accordingly for your setup:
 
 ```
-&gt; aws lambda create-function \
+> aws lambda create-function \
 --region us-west-2 \
 --function-name average \
 --zip-file fileb://../average.zip \
@@ -369,7 +369,7 @@ If all goes well, you should receive a JSON response with some additional info a
 Now that we've deployed the function, let's test it out again - this time using the CLI.  Invoke the function, specifying the same event as last time (which is called `payload` by the CLI).
 
 ```
-&gt; aws lambda invoke \
+> aws lambda invoke \
 --invocation-type RequestResponse \
 --function-name average \
 --region us-west-2 \
@@ -392,7 +392,7 @@ You'll get something that looks like this:
 Not helpful - but easily decoded.  The LogResult is encoded in base64, so you can do the following:
 
 ``` 
-&gt; echo U1RBUlQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYgVmVyc2lvbjogJExBVEVTVApFTkQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYKUkVQT1JUIFJlcXVlc3RJZDogMTNlMTU5OGQtNjRjMS0xMWU2LTg0NDctMGQ2YzIyYzE0YWVmCUR1cmF0aW9uOiAwLjUxIG1zCUJpbGxlZCBEdXJhdGlvbjogMTAwIG1zIAlNZW1vcnkgU2l6ZTogMTI4IE1CCU1heCBNZW1vcnkgVXNlZDogMzUgTUIJCg== |  base64 --decode 
+> echo U1RBUlQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYgVmVyc2lvbjogJExBVEVTVApFTkQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYKUkVQT1JUIFJlcXVlc3RJZDogMTNlMTU5OGQtNjRjMS0xMWU2LTg0NDctMGQ2YzIyYzE0YWVmCUR1cmF0aW9uOiAwLjUxIG1zCUJpbGxlZCBEdXJhdGlvbjogMTAwIG1zIAlNZW1vcnkgU2l6ZTogMTI4IE1CCU1heCBNZW1vcnkgVXNlZDogMzUgTUIJCg== |  base64 --decode 
 
 START RequestId: 13e1598d-64c1-11e6-8447-0d6c22c14aef Version: $LATEST
 END RequestId: 13e1598d-64c1-11e6-8447-0d6c22c14aef

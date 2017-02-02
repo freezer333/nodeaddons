@@ -32,13 +32,13 @@ For situations where you have complete access (and are comfortable editing) the 
 All of the code for this series is available on [github](https://github.com/freezer333/cppwebify-tutorial):
 
 ```
-&gt; git clone https://github.com/freezer333/cppwebify-tutorial.git
+> git clone https://github.com/freezer333/cppwebify-tutorial.git
 ```
 
 For this particular post, checkout the **addon** tag
 
 ```
-&gt; git checkout addon
+> git checkout addon
 ```
 
 As described in the earlier posts, I'm using a C implementation of the Prime number sieve as an example.  I've been integrating the C / C++ code into a Node.js web application - with a dedicated route/url for invoking each example technique.
@@ -86,7 +86,7 @@ Happily, the folks at [io.js Addon API Working Group](https://github.com/nodejs/
 Nan is ultimately a C++ library, however you install it with npm.  First, we'll create a new project (folder) for our soon-to-be addon.  I've created it at `/cpp/nodeprime_sync`.  Now we'll need to install Nan with the following command:
 
 ```
-&gt; npm install --save nan
+> npm install --save nan
 ```
 
 That command will download Nan and put it in the `node_modules` directory under `/cpp/nodeprime_sync)`.  In addition to the C++ API defined in V8, we now have a bunch of headers (and a namespace) for `Nan` that we can use in our C++ module.
@@ -95,9 +95,9 @@ That command will download Nan and put it in the `node_modules` directory under 
 Next up, we create our C++ addon file - `/cpp/nodeprime_sync/addon.cpp`.  We are going to create a wrapper around the `generate_primes` function found in `/cpp/prime4lib` and register it with V8 using macros defined in V8 and Nan.  First, we'll include the headers for the primesieve code, the exchange class we use to collect data from the primseieve code, and V8/Nan:
 
 ```c++
-#include &lt;nan.h&gt;  // includes v8 too
-#include &lt;functional&gt;
-#include &lt;iostream&gt;
+#include <nan.h>  // includes v8 too
+#include <functional>
+#include <iostream>
 
 #include "exchange.h"  // class to hold values returned from primesieve
 #include "prime_sieve.h"
@@ -121,17 +121,17 @@ So, here's the C++:
 NAN_METHOD(CalculatePrimes) {
     Nan:: HandleScope scope;
     
-    int under = To&lt;int&gt;(info[0]).FromJust();
-    v8::Local&lt;v8::Array&gt; results = New&lt;v8::Array&gt;(under);
+    int under = To<int>(info[0]).FromJust();
+    v8::Local<v8::Array> results = New<v8::Array>(under);
 
     int i = 0;
     exchange x(
-        [&amp;](void * data) {
-            Nan::Set(results, i, New&lt;v8::Number&gt;(*((int *) data)));
+        [&](void * data) {
+            Nan::Set(results, i, New<v8::Number>(*((int *) data)));
             i++;
        });
 
-    generate_primes(under, (void*)&amp;x);
+    generate_primes(under, (void*)&x);
 
     info.GetReturnValue().Set(results);
 }
@@ -144,14 +144,14 @@ The first line in the function creates a scope, an important aspect of the V8 me
 The next line of code is where we extract the parameter this function would be called with.   Since JavaScript plays fast and loose with the number of parameters a function can be called with, Nan wraps the actual call signature in an `info` object.  It's an array of parameters, representing the parameters the JavaScript code called the function with.  
 
 ```c++
-int under = To&lt;int&gt;(info[0]).FromJust();
+int under = To<int>(info[0]).FromJust();
 ```
 
 We are simply casting this to a standard integer.  Next, we allocate a new local V8 array that will be our return value - an array of prime numbers less than "under".
 
 ```c++
 // conservatively assume under is the maximum number of primes
-v8::Local&lt;v8::Array&gt; results = New&lt;v8::Array&gt;(under);
+v8::Local<v8::Array> results = New<v8::Array>(under);
 ```
 
 Next is our exchange class, from the last post.  We are creating a callback, which primesieve (`generate_primes`) will call each time a prime number is found.  Here, instead of adding each prime number to a vector, we are adding it to the local V8 array we have declared.  Note that the array will be "oversized", since if  "under" is 100 there is clearly not 100 prime numbers less than 100!  Each element that is not explicitely set will be set to `undefined` when accessed through JavaScript later.  We now call the primesieve implementation, which executes and incrementally fills up the array with primes through the exchange object.
@@ -159,12 +159,12 @@ Next is our exchange class, from the last post.  We are creating a callback, whi
 ```c++
 int i = 0;
 exchange x(
-    [&amp;](void * data) {
-        Nan::Set(results, i, New&lt;v8::Number&gt;(*((int *) data)));
+    [&](void * data) {
+        Nan::Set(results, i, New<v8::Number>(*((int *) data)));
         i++;
    });
 
-generate_primes(under, (void*)&amp;x);
+generate_primes(under, (void*)&x);
 ```
 
 All that's left to do is return the data to JavaScript - which is done through the `info` object.
@@ -179,8 +179,8 @@ Finally, we need to register this function (`CalculatePrimes`) with V8 correctly
 
 ```c++
 NAN_MODULE_INIT(Init) {
-    Nan::Set(target, New&lt;String&gt;("getPrimes").ToLocalChecked(),
-        GetFunction(New&lt;FunctionTemplate&gt;(CalculatePrimes)).ToLocalChecked());
+    Nan::Set(target, New<String>("getPrimes").ToLocalChecked(),
+        GetFunction(New<FunctionTemplate>(CalculatePrimes)).ToLocalChecked());
 }
 
 NODE_MODULE(addon, Init)
@@ -200,7 +200,7 @@ As in all of the posts in this series, I'll use node-gyp to build the addon.  I'
                    "../prime4lib/exchange.cpp", 
                    "addon.cpp"],
       "cflags": ["-Wall", "-std=c++11"],
-      "include_dirs" : ['../prime4lib', "&lt;!(node -e \"require('nan')\")"],
+      "include_dirs" : ['../prime4lib', "<!(node -e \"require('nan')\")"],
       "conditions": [ 
         [ 'OS=="mac"', { 
             "xcode_settings": { 
@@ -272,8 +272,8 @@ Notice that `getPrimes` now gets two parameters, "under" and a callback function
 
 ```c++
 NAN_METHOD(CalculatePrimes) {
-    int under = To&lt;int&gt;(info[0]).FromJust();
-    Callback *callback = new Callback(info[1].As&lt;Function&gt;());
+    int under = To<int>(info[0]).FromJust();
+    Callback *callback = new Callback(info[1].As<Function>());
 
     AsyncQueueWorker(new PrimeWorker(callback, under));
 }
@@ -296,12 +296,12 @@ Once we call `AsyncQueueWorker` from `CalculatePrimes`, libuv will dispatch our 
 ```c++
 void Execute () {
   exchange x(
-    [&amp;](void * data) {
+    [&](void * data) {
       primes.push_back(*((int *) data));
     }
   );
   
-  generate_primes(under, (void*)&amp;x);
+  generate_primes(under, (void*)&x);
 }
 ```
 
@@ -311,17 +311,17 @@ This is pretty much *exactly* what the synchronous version of `CalculatePrimes` 
 void HandleOKCallback () {
   Nan:: HandleScope scope;
 
-  v8::Local&lt;v8::Array&gt; results = New&lt;v8::Array&gt;(primes.size());
+  v8::Local<v8::Array> results = New<v8::Array>(primes.size());
   int i = 0;
   for_each(primes.begin(), primes.end(),
-    [&amp;](int value) {
-      Nan::Set(results, i, New&lt;v8::Number&gt;(value));
+    [&](int value) {
+      Nan::Set(results, i, New<v8::Number>(value));
       i++;
     });
 
 
-  Local&lt;Value&gt; argv[] = { Null(), results };
-  callback-&gt;Call(2, argv);
+  Local<Value> argv[] = { Null(), results };
+  callback->Call(2, argv);
 }
 ```
 Since this method is actually called in the Node event loop thread, we can allocate a V8 Local Array that will be returned back to JavaScript.  We create a scope, initialize an array (this time, exactly the right size, since we already have the vector with the primes).  Next we use a `for_each` to fill the array.

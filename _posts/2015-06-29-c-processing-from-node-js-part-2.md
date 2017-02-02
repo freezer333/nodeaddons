@@ -97,7 +97,7 @@ As explained in [Part 1](), I'm keeping the "business" part of my C++ code compl
 We're going to now create a new callable function for the Node addon.  So, in the rainfall_node.cc file (where we put all our V8 integration logic), I'll add a new function and register it with the module's exports.
 
 ```c++
-void RainfallData(const v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args) {
+void RainfallData(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
   
   location loc = unpack_location(isolate, args);
@@ -113,7 +113,7 @@ Recall from [Part 1](), the `unpack_location` function is where I'm extracting t
 The `RainfallData` function is exported with the addon by adding another call to `NODE_SET_METHOD` inside the `init` function in `rainfall_node.cc`.
 
 ```c++
-void init(Handle &lt;Object&gt; exports, Handle&lt;Object&gt; module) {
+void init(Handle <Object> exports, Handle<Object> module) {
   // from part 1
   NODE_SET_METHOD(exports, "avg_rainfall", AvgRainfall);
   // now added for part 2
@@ -131,23 +131,23 @@ rain_result result = calc_rain_stats(loc);
 Now its time to return that - and to do so we'll create a new V8 object, transfer the rain_result data into it, and return it back to JavaScript.
 
 ```C++
-void RainfallData(const v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args) {
+void RainfallData(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
   
   location loc = unpack_location(isolate, args);
   rain_result result = calc_rain_stats(loc);
 
   // Creates a new Object on the V8 heap
-  Local&lt;Object&gt; obj = Object::New(isolate);
+  Local<Object> obj = Object::New(isolate);
   
   // Transfers the data from result, to obj (see below)
-  obj-&gt;Set(String::NewFromUtf8(isolate, "mean"), 
+  obj->Set(String::NewFromUtf8(isolate, "mean"), 
                             Number::New(isolate, result.mean));
-  obj-&gt;Set(String::NewFromUtf8(isolate, "median"), 
+  obj->Set(String::NewFromUtf8(isolate, "median"), 
                             Number::New(isolate, result.median));
-  obj-&gt;Set(String::NewFromUtf8(isolate, "standard_deviation"), 
+  obj->Set(String::NewFromUtf8(isolate, "standard_deviation"), 
                             Number::New(isolate, result.standard_deviation));
-  obj-&gt;Set(String::NewFromUtf8(isolate, "n"), 
+  obj->Set(String::NewFromUtf8(isolate, "n"), 
                             Integer::New(isolate, result.n));
 
   // Return the object
@@ -158,20 +158,20 @@ void RainfallData(const v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args) {
 First notice the similarities between this function and the AvgRainfall Function from Part 1. They both follow the similar pattern of creating a new variable on the V8 heap and returning it by setting the return value associated with the `args` variable passed into the function.  The difference now is that actually setting the value of the variable being returned is more complicated.  In AvgRainfall, we just created a new `Number`:
 
 ```C++
-Local&lt;Number&gt; retval = v8::Number::New(isolate, avg);
+Local<Number> retval = v8::Number::New(isolate, avg);
 ```
 
 Now, we have we instead move the data over one property at time:
 
 ```C++
-Local&lt;Object&gt; obj = Object::New(isolate);
-obj-&gt;Set(String::NewFromUtf8(isolate, "mean"), 
+Local<Object> obj = Object::New(isolate);
+obj->Set(String::NewFromUtf8(isolate, "mean"), 
                    Number::New(isolate, result.mean));
-obj-&gt;Set(String::NewFromUtf8(isolate, "median"), 
+obj->Set(String::NewFromUtf8(isolate, "median"), 
                    Number::New(isolate, result.median));
-obj-&gt;Set(String::NewFromUtf8(isolate, "standard_deviation"), 
+obj->Set(String::NewFromUtf8(isolate, "standard_deviation"), 
                    Number::New(isolate, result.standard_deviation));
-obj-&gt;Set(String::NewFromUtf8(isolate, "n"), 
+obj->Set(String::NewFromUtf8(isolate, "n"), 
                    Integer::New(isolate, result.n));
 ```
 
@@ -181,7 +181,7 @@ While its a bit more code - the object is just being built up with a series of n
 Now that we've completed the C++ side, we need to rebuild our addon:
 
 ```
-&gt; node-gyp configure build
+> node-gyp configure build
 ```
 
 In JavaScript, we can now call both methods, and we'll see the object returned by our new data_rainfall method returns a real JavaScript object.
@@ -211,7 +211,7 @@ console.log("N = " + data.n);
 ```
 
 ```console256
-&gt; node rainfall.js
+> node rainfall.js
 Average rain fall = 1.26cm
 Mean = 1.2599999904632568
 Median = 1.2999999523162842
