@@ -20,3 +20,10 @@ author: "Scott Frees"
 
 feed:
   path: feed.rss
+
+defaults:
+ - 
+  scope:
+    path: ""
+  values:
+    short: false

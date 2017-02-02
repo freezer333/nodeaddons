@@ -859,6 +859,24 @@ dl dd {
   color:#DC9456;
 }
 
+.about-sidebar img {
+  width:100%;
+  border-radius:10px;
+}
+.about-sidebar p {
+  font-size:12pt;
+  margin-top:20px;
+}
+.about-sidebar {
+   margin-bottom:200px;
+}
+.node-sidebar {
+  margin-bottom:200px;
+}
+
+.cpp-sidebar {
+  margin-bottom:200px;
+}
 
 figure.highlight { margin-left:0px;margin-right:0px;}
 .code {text-align:left}

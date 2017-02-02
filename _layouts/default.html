@@ -76,8 +76,12 @@
             <img src="{{ site.baseurl }}/images/book-thumbnail-200.png"/>
             </a>
           </div>
+          
+          {% include me.html %}
+          {% unless page.short %}
           {% include learning_node.html %}
           {% include learning_cpp.html %}
+          {% endunless %} 
         </aside>
       </div>
       {% else %}
