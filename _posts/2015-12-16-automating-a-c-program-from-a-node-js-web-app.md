@@ -36,14 +36,14 @@ For this particular post, checkout the **automation** tag
 > git checkout automation
 ```
 
-# Case Study:  Prime Sieve C/C++ implementation
+## Case Study:  Prime Sieve C/C++ implementation
 As described in the [opening post](/getting-your-c-to-the-web-with-node-js), I'm building all my examples for this series around a C implementation of the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) Prime number calculation strategy.  It's a good example problem, because speed matters big time for prime numbers - and the C code that I'm using is not exactly the type of thing you'd be eager to rewrite!  
 
 The example I'm using  - [found here](http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.html) - is actually pretty simple, compared to more complex techniques that leverage CPU caching, among other things.  Head over to [primesieve.org](http://primesieve.org/) to get an idea.  For implementations of Prime Sieve, the user of the program must enter a maximum value, and the algorithm will output all prime numbers "under" this value.  We'll call that input value "under" throughout most of this post.
 
 To follow along, please take a look at the [original primesieve.c code now](https://gist.github.com/freezer333/ee7c9880c26d3bf83b8e) - although don't get too caught up in the details, we won't need to mess with it much (that's the whole point!).
 
-## Modifications to primesieve.c
+### Modifications to primesieve.c
 When faced with integrating a legacy program, you might not have the luxury of accessing the code.  For the purposes of this article, I'm going to simulate a few common integration scenarios - and I'll edit some bits of the original primesieve.c in order to allow for this.
 
 - **Scenario 1:** An app that gets input only from command line arguments, and prints to standard out.
@@ -92,7 +92,7 @@ extern "C" {
 
 ```
 
-# The Node.js Child Process API
+## The Node.js Child Process API
 Node.js contains a `child_process` module which exposes a robust API for creating and controlling processes.  There are three basic calls for creating new child processes - each with their own use cases.
 
 The first is `execFile`, which accepts (at a minimum) a file path to an executable program.  You may pass an array of arguments that will be called with the program.  The last parameter to the function is a callback to be executed when the program terminates.  This callback will have an error, a stdout buffer, and a stderr buffer given to it, which can be used to interrogate the program's output.  It's important to note that this callback is only called after the program executes.  `execFile` also returns an object representing the child process, and you may write to it's stdin stream.
@@ -119,10 +119,10 @@ I find the `execFile` function is best when you have to automate an application 
 
 The `child_process` module has two other functions to create processes - `spawn` and `exec`.  `spawn` is a lot like `execFile`, it accepts an executable and launches it.  The difference is that `spawn` will give you a streamable interface to stdout and stderr.  This works really well for more complex I/O scenarios where there is a back and forth dialog between your node code and the C++ app.  `exec` is again very similar to `execFile`, but is used for shell programs (ls, pipes, etc).
 
-## Synchronous options
+### Synchronous options
 In Node.js v0.12 a [new set of API's](https://strongloop.com/strongblog/whats-new-in-node-js-v0-12-execsync-a-synchronous-api-for-child-processes/) was introduced which allows you to execute child applications *synchronously* - your program will block when you start the child process and resume when the child process terminates (and sends you back it's output).  This is fantastic if you are creating shell scripts, but it's decidedly *not* for web applications.  For our prime number demo, certainly when we get an HTTP request for prime numbers we need to wait for the complete output before serving the page of results to the browser - *but we should be able to continue serving **other HTTP** requests from other browsers* in the meantime!  Unless you have a really specific reason, you'll want to stay away from `spawnSync`, `execSync`, and `execFileSync` when writing web servers.
 
-# Scenario 1:  C++ Program with input from command-line arguments
+## Scenario 1:  C++ Program with input from command-line arguments
 The simplest type of program to automate is a program that will accept all of it's input as command line arguments and dump it's output to stdout - so we'll start with this scenario.
 
 So - let's "imagine" prime sieve works like this (actually, it basically already does!).  To use the application, we might type:
@@ -140,7 +140,7 @@ And we'd get all prime numbers under 10 printed out to the screen (one on each l
 
 *I'll keep the output easy to parse in all my examples - obviously if your program spits out data in a tough-to-parse way, you'll have a bit more work to do.*
 
-## Using node-gyp to compile the prime sieve C++
+### Using node-gyp to compile the prime sieve C++
 Our first step is to actually get an executable C++ application!  The C++ code in `cpp/prime4standalone` doesn't have an entry point - it's just the prime number generation code, and it will be shared across all 3 of the scenarios we're covering in this post.  In `cpp/standalone_stdio` I've created an entry point:
 
 ```c++
@@ -176,7 +176,7 @@ You'll need to make sure you have a C++ compiler installed on your system - node
 
 How does this work?  In `/cpp/standalone_stdio` you'll find a `binding.gyp` file.  This contains all the information needed to build this particular example with node-gyp - think of it as a Makefile.
 
-```js
+```json
 {
   "targets": [
     {
@@ -184,13 +184,13 @@ How does this work?  In `/cpp/standalone_stdio` you'll find a `binding.gyp` file
       "type": "executable",
       "sources": [ "../prime4standalone/prime_sieve.c", "main.cpp"],
       "cflags": ["-Wall", "-std=c++11"],
-      "include_dirs" : ['../prime4standalone'],
+      "include_dirs" : ["../prime4standalone"],
       "conditions": [
-        [ 'OS=="mac"', {
+        [ "OS=='mac'", {
             "xcode_settings": {
-                'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11','-stdlib=libc++'],
-                'OTHER_LDFLAGS': ['-stdlib=libc++'],
-                'MACOSX_DEPLOYMENT_TARGET': '10.7' }
+                "OTHER_CPLUSPLUSFLAGS" : ["-std=c++11","-stdlib=libc++"],
+                "OTHER_LDFLAGS": ["-stdlib=libc++"],
+                "MACOSX_DEPLOYMENT_TARGET": "10.7" }
             }
         ]
       ]
@@ -203,7 +203,7 @@ Lets cover a few basics.  We only have one target defined ("standalone") - so it
 
 The result of our build operation - `node-gyp configure build` - should create an executable in `cpp/standalone_stdio/build/Release` called `standalone`.  You should be able to run it directly from the command line.  **Now let's run it from Node.js**.
 
-## Automating from Node.js
+### Automating from Node.js
 In the [first post](/getting-your-c-to-the-web-with-node-js) I setup a really simple Node.js web application that had a single route that could calculate prime numbers using a pure JavaScript prime sieve implementation.  Now we'll create a second route that uses our C++ implementation.
 
 In `cppwebify-tutorial/web/index.js` first we'll add a new entry in our `types` array for the new C++ route:
@@ -243,12 +243,12 @@ router.post('/', function(req, res) {
     var child = execFile(program, [under],
       function (error, stdout, stderr) {
         // The output of the prime_sieve function has 
-		// one prime number per line.  
+        // one prime number per line.  
         // The last 3 lines are additional information, which we 
-		// aren't using here - so I'm slicing the stdout array and 
-		// mapping each line to an int.
+        // aren't using here - so I'm slicing the stdout array and 
+        // mapping each line to an int.
         // You'll certainly want to be a bit more careful 
-		// parsing your program's output!
+        // parsing your program's output!
         var primes = stdout.split("\n").slice(0, -3)
                            .map(function (line) {
                              return parseInt(line);
@@ -267,10 +267,10 @@ While you'll likely need to be a bit more robust when handling program output (a
 
 ![Results for primes under 100](https://raw.githubusercontent.com/freezer333/cppwebify/master/posts/img002.png)
 
-# Scenario 2:  C++ Program that gets input from user (stdin)
+## Scenario 2:  C++ Program that gets input from user (stdin)
 Lots of programs ask an actual user for their input.  If you have access to the code of your program, it's probably easy to change it so it accepts these inputs as command line args - which means you could just use the strategy in Scenario 1.  Sometimes this won't work though - like if you don't even have the source code!  It also doesn't work when automating a program that actually has a bit of a dialog with the user, which you need to simulate through node.  No worries though - writing to stdin is pretty straightforward, especially if you don't need to wait for any output from the child process first (if you do, check out `spawn` instead of `execFile` by the way).
 
-## Building the C++ example
+### Building the C++ example
 In `cpp/standalone_usr` I've created a new entry point for a C++ program that simply asks the user for the `under` parameter the prime sieve algorithm needs.
 
 ```c++
@@ -289,7 +289,7 @@ int main(int argc, char ** argvs) {
 
 It's including the very same prime_sieve.h file as the code in Scenario 1, and is build with a strikingly similar `binding.gyp` file.  Go ahead and build that with `node-gyp configure build` at the terminal from `cpp/standalone_usr`.
 
-## Writing to stdin to automate from Node.js
+### Writing to stdin to automate from Node.js
 Now we've got a new executable build, which asks for input from a live user.  We can now drop yet another route into our web app to automate this one too.  In `web/index.js` we'll create another type entry:
 
 ```js
@@ -339,19 +339,19 @@ router.post('/', function(req, res) {
     });
 
     // now we write "under" to stdin so the C++ program 
-	// can proceed (it's blocking for user input)
+    // can proceed (it's blocking for user input)
     child.stdin.setEncoding('utf-8');
     child.stdin.write(under + "\n");
     // Once the stdin is written, the C++ completes and 
-	// the callback above is invoked.
+    // the callback above is invoked.
 });
 ```
 By now you probably have the idea.. fire up the web app again and now you'll have a third entry at the start page - go ahead and test it out!
 
-# Scenario 3:  Automating a file-based C++ program
+## Scenario 3:  Automating a file-based C++ program
 The last scenario I'll go over is where the program you are automating takes its input from a file, and dumps its output to a another file.  Of course, your scenario might be a combination of the three scenarios discussed here - and your scenario might involved a fixed filename for input/output, or a user specified (via stdin, or command line arguments).  Whatever your situation, you'll likely be able to apply what's here.
 
-## Modifications to prime sieve to use files
+### Modifications to prime sieve to use files
 So the first step is to shape the prime sieve into something resembling a file-based program.  If you take a look at `cpp/standalone_flex_file`, I've created a third entry point for prime sieve that accepts input/output filenames along the command line.  The input file is assumed to simply have "under" on the first line.  The output file will receive the same lines of results as previously went to stdin.
 
 ```c++
@@ -378,7 +378,7 @@ int main(int argc, char ** argvs) {
 ```
 We can build this C++ program by issuing the familiar `node-gyp configure build` from `cpp/standalone_flex_file`.  This will generate a target executable we can use from node.
 
-## Dealing with file-based program on the web
+### Dealing with file-based program on the web
 Before diving into the Node.js route for this scenario, lets talk about the challenge involved in a file-based program.  Most applications never meant for the web will read a specified input file and write to an output file as if the application is the only thing running... and as if it's not running alongside another instance of the same program!  This made sense when these applications were being run manually - but if you are placing them on the web you can easily have multiple simultaneous requests (from different browsers) coming in at the same time.  It's critical that these simultaneous executions of your legacy C++ program don't collide with each other - you need to ensure they are reading from and writing to their own distinct files!
 
 When you don't have access to the legacy source code, this can be easier said than done, especially if the app does not let the user specify the files (i.e. they are hardcoded in the program!).  If they are hardcoded, but relative file paths, then I usually create a copy of the executable (or a link to it) in a temporary directory on each incoming web requests.  It's costly performance-wise, but it works.  If the files paths are hard coded to absolute paths, you have quite a problem (find the code!).
@@ -412,24 +412,24 @@ router.post('/', function(req, res) {
         // once the input file is ready, execute with the input and
         // output paths specified on the command line
         var primes = execFile(program, [inputPath, outputPath], 
-			function(error) {
-				if (error ) throw error;
-				fs.readFile(outputPath, function(err, data) {
-					if (err) throw err;
-					var primes = data.toString().split('\n')
-								.slice(0, -3)
-								.map(function (line) {
-									return parseInt(line)});
-					res.setHeader('Content-Type', 'application/json');
-					res.end(JSON.stringify({results: primes}));
-					exec('rm -r ' + dirPath, function(error) {
-						if (error) throw error;
-						console.log("Removed " + dirPath);
-					});
-				});
-			});
-		});
-	});
+         function(error) {
+           if (error ) throw error;
+           fs.readFile(outputPath, function(err, data) {
+             if (err) throw err;
+             var primes = data.toString().split('\n')
+                              .slice(0, -3)
+                              .map(function (line) {
+                                return parseInt(line)});
+             res.setHeader('Content-Type', 'application/json');
+             res.end(JSON.stringify({results: primes}));
+             exec('rm -r ' + dirPath, function(error) {
+               if (error) throw error;
+               console.log("Removed " + dirPath);
+           });
+         });
+      });
+    });
+  });
 });
 ```
 The above code first creates the temporary directory.  It then writes the input file and launches the child process with the input and output file paths as command line arguments.  Once the process completes, we read the output file to get the results, serving it back to the browser just like before.  Finally, we clean up the temporary files by removing parent directory.  This is important, since even though the `temp` module allows for tracking and automatic deletion of temporary files, it only cleans things up when the process terminates.  Since this is a web app, we would (hopefully!) be waiting a long time for this to happen.
@@ -438,7 +438,7 @@ As you can see, this code would benefit from better control flow patterns(async,
 
 Aside from the route above, I've added this final scenario to the `types` array in `web/index.js` and you can start your web app and test this one out just like the others.
 
-# Up next...
+## Up next...
 This post presented the first option introduced in the series - automation.  It works really well when you really have your hands tied - like if you can't edit the source code of the legacy C++ app.  It also allows for asynchronous execution of the C++ code, and limits the work you need to do.  There is, however, a large cost to launching processes.  Not only is it a relatively slow operation, it is also resource intensive.  If you expect a lot of traffic, you'll quickly realize that launching a new process for each incoming request doesn't scale well at all.
 
 I wrote up three types of integration scenarios that I think cover the most common cases, but I'm sure there are some legacy (or new) programs that require different strategies - if you've seen some, drop a note into the comment section!

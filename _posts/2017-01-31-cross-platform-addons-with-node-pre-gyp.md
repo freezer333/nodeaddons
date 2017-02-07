@@ -466,7 +466,8 @@ Now, we can publish by using `node-pre-gyp` directly.  If you installed `node-pr
 Before publishing, review the `addon/package.json` file - recall we skipped over the `host` entry in the `binary` section.  That host value is the root URL for your Amazon S3 bucket.
 
 {% highlight json %}
-"binary": {
+
+"binary" : {
     "module_name": "native_rt",
     "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
     "remote_path": "./{module_name}/v{version}/{configuration}/",

@@ -14,12 +14,12 @@ disqus_shortname: scottfrees
 ---
 This article is Part 4 of a series of posts on moving data back and forth between Node.js and C++. In [Part 1](/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript. In Parts [2](/c-processing-from-node-js-part-2) and [3](/c-processing-from-node-js-part-3-arrays), I covered more complex use cases involving moving lists and objects.  This post covers **asynchronous** C++ addons - which are probably the most useful.
 <!--more-->
-# Why Asynchronous?
+## Why Asynchronous?
 If you are dropping into C++ to do some calculations, chances are good that you are doing it for speed.  If you are going though all this trouble for speed, then you probably have a hefty calculation to do - and its going to take time (even in C++!).
 
 Unfortunately, if you make a call from JavaScript to a C++ addon that executes synchronously, your JavaScript application will be **blocked** - waiting for the C++ addon to return control.  This basically goes against *ALL best-practices*, your event loop is stalled!
 
-# Asynchronous addon API
+## Asynchronous addon API
 If you haven't read parts 1-3 of this series, make sure you do - so you understand the data structures being passed back and forth.  We're sending in lists of lat/longitude positions with rainfall sample data, and C++ is returning back statistics on that data.  Its a contrived example, but its working so far.
 
 So the idea is to change our API from this:
@@ -50,7 +50,7 @@ rainfall.calculate_results_async(locations, print_rain_results);
 // we can continue here, before the callback is invoked.
 ```
 
-# The C++ addon code
+## The C++ addon code
 Our first step is to create yet another C++ function, and register it with our module.  This is basically the same as in the previous posts.  Make sure you take a look at the full code [here](https://github.com/freezer333/nodecpp-demo)
 
 ```cpp
@@ -72,7 +72,7 @@ void init(Handle <Object> exports, Handle<Object> module) {
 
 The `CalculateResultsAsync` function is where we'll end up kicking off a worker thread using libuv  - but notice what it does right away:  it *returns*!  Nothing we fill into this function will be long running, all the real work will be done in the worker thread.
 
-## Worker thread model
+### Worker thread model
 Lets do a quick overview of how worker threads should work in V8.  In our model, there are **two threads**.  
 
 The first thread is the *event loop thread* - its the thread that our JavaScript code is executing in, and its the thread that we are **still in** when we cross over into C++ through the `calculate_results_async` function call.  This is the thread that we *don't* want to stall by doing heavy calculations!
@@ -156,7 +156,7 @@ Notice the arguments to `uv_queue_work` - its the work->request we setup at the 
 
 At this point, control is passed back to Node (JavaScript).  If we had further JavaScript to execute, it would execute now.  Basically, from the JavaScript side, our addon is acting the same as any other asynchronous call we typically make (like reading from files).
 
-## The worker thread
+### The worker thread
 The worker thread code is actually really simple. We just need to process the data - and since its already extracted out of the V8 objects, its pretty vanilla C++ code.  Its largely explained in [Part 3](/c-processing-from-node-js-part-3-arrays), with the exception of the cast of the `work` data.  Notice our function has been called with the libuv work request parameter.  We set this up above to point to our actual work data.
 
 ```cpp
@@ -182,7 +182,7 @@ static void WorkAsync(uv_work_t *req)
 
 Note - the code above also sleeps for extra effect, since the rainfall data isn't really that large in my demo.  You can remove it, or substitute it with Sleep(3000) on Windows (and replace `#include <unistd.h>` with `#include <windows.h>`).
 
-## When the worker completes...
+### When the worker completes...
 Once the worker thread completes, libuv handles calling our `WorkAsyncComplete` function - passing in the work request object again - so we can use it!
 
 ```cpp
@@ -234,5 +234,5 @@ rainfall.calculate_results_async(locations, function(results) {
 });
 ```
 
-# What next?
+## What next?
 There's a lot more to learn about using C++ within Node.js - topics like wrapping existing C++ objects, working with multiple versions of the V8 API, and deployment on different platforms.  If you are looking for a manual that goes over all this and more, check out my [ebook on this topic](/book/) - it's a great shortcut!  You can [buy it here](https://gumroad.com/l/dTVf)

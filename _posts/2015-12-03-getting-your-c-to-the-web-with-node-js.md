@@ -33,7 +33,7 @@ There are a few practical reasons not to rewrite code.  **First**, you might not
 
 The **third reason** not to rewrite your C++ is because it might really want to be in C++!  While Node.js has decent performance, it's simply not C/C++.  If your application has extreme performance criteria, you aren't going to beat C++.
 
-# C++ and Node.js - your options
+## C++ and Node.js - your options
 I've come up with three general ways of integrating C++ code with a Node.js application - although there are lots of variations within each category:
 
 1. **[Automation](/automating-a-c-program-from-a-node-js-web-app)** - call your C++ as a standalone app in a child process.
@@ -124,7 +124,7 @@ To launch the web server, navigate to the `/web` directory in your terminal and 
 ... dependencies will be installed
 > node index
 ```
-You need Node 0.12 or greater to be installed).
+You need Node 0.12 or greater to be installed.
 
 Now point your browser to `http://localhost:3000`.  You'll get the index page, which lists the implementation options.  For now, you'll just have one option - "pure_node". Click on it, and you'll see a page with a single number box.  Type `100` and submit - and the Node.js implementation of primesieve will run and return all prime numbers under 100.
 
@@ -145,22 +145,22 @@ router.post('/', function(req, res) {
 });
 ```
 
-# Up next...
+## Up next...
 This post is kicking off a series where we'll dive into all three options for integrating C++ into Node.js - [(1) automation](/automating-a-c-program-from-a-node-js-web-app), (2) shared library, and (3) addons.  I've outlined why you'd choose each one, and shown you the basic example I'll be extending throughout the series.  In the [next post](/automating-a-c-program-from-a-node-js-web-app), we'll take a closer look at automation option.
 
-# Notes
+## Notes
 If you are looking for additional information about anything I talked about above, here are some links that might help you.  Let me know if I'm missing anything!
 
-## Staying with C++
+### Staying with C++
 - [Tutorial on CGI Scripting with C++](http://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm)
 - [Faster CGI Scripting](http://cgi.sourceforge.net/)
 - [Silicon web framework](http://siliconframework.org/)
 
-## Why not rewrite legacy code?
+### Why not rewrite legacy code?
 - [Dave Thomas - Software Engineering Podcast](http://www.se-radio.net/2015/11/se-radio-episode-242-dave-thomas-on-innovating-legacy-systems/)
 - [Joel Spolski - Things You Should Never Do, Part I](http://www.joelonsoftware.com/articles/fog0000000069.html)
 
-## Previous Posts on Node.js Addons
+### Previous Posts on Node.js Addons
 - [C++ processing from Node.js - An Introduction](/c-processing-from-node-js)
 - [C++ processing from Node.js - Returning objects to JavaScript from C++](/c-processing-from-node-js-part-2)
 - [C++ processing from Node.js - Passing Arrays of Objects](/c-processing-from-node-js-part-3-arrays)

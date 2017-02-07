@@ -63,7 +63,7 @@ nodeprime.getPrimes(100, function (err, primes) {
 });
 ```
 
-# How addons work
+## How addons work
 If you've done any work in Node.js, then you are very familiar with the following:
 
 ```js
@@ -80,7 +80,7 @@ Knowing a bit about the V8 API, along with the basics of packaging your module s
 
 The only catch is (1) the V8 API is tricky - due to the complexities of memory management and coordinating resources between the JavaScript executing in the Node.js event loop and your own modules and (2) the API tends to change in subtle (and not so subtle) ways every so often.  To learn all about the details of this, check out my [posts](/c-processing-from-node-js), and my [ebook](/book/).
 
-## Nan - protection from the V8 API
+### Nan - protection from the V8 API
 Happily, the folks at [io.js Addon API Working Group](https://github.com/nodejs/nan#governance--contributing) have created and maintained an abstraction layer around the V8 API which can make these challenges a bit easier to deal with.  You can read a lot about it [here](https://nodesource.com/blog/c-add-ons-for-nodejs-v4/)
 
 Nan is ultimately a C++ library, however you install it with npm.  First, we'll create a new project (folder) for our soon-to-be addon.  I've created it at `/cpp/nodeprime_sync`.  Now we'll need to install Nan with the following command:
@@ -91,7 +91,7 @@ Nan is ultimately a C++ library, however you install it with npm.  First, we'll 
 
 That command will download Nan and put it in the `node_modules` directory under `/cpp/nodeprime_sync)`.  In addition to the C++ API defined in V8, we now have a bunch of headers (and a namespace) for `Nan` that we can use in our C++ module.
 
-# Synchronous Addon Code
+## Synchronous Addon Code
 Next up, we create our C++ addon file - `/cpp/nodeprime_sync/addon.cpp`.  We are going to create a wrapper around the `generate_primes` function found in `/cpp/prime4lib` and register it with V8 using macros defined in V8 and Nan.  First, we'll include the headers for the primesieve code, the exchange class we use to collect data from the primseieve code, and V8/Nan:
 
 ```c++
@@ -188,10 +188,10 @@ NODE_MODULE(addon, Init)
 
 The first macro associates an exported "getPrimes" function with `CalculatePrimes`.  It's an initialization function that V8 will call when the addon is loaded.  The last macro (V8, not Nan) tells V8 to call that very `Init` function.
 
-## Building the addon
+### Building the addon
 As in all of the posts in this series, I'll use node-gyp to build the addon.  I've created a `binding.gyp` file:
 
-```js
+```json
 {
   "targets": [
     {
@@ -200,13 +200,13 @@ As in all of the posts in this series, I'll use node-gyp to build the addon.  I'
                    "../prime4lib/exchange.cpp", 
                    "addon.cpp"],
       "cflags": ["-Wall", "-std=c++11"],
-      "include_dirs" : ['../prime4lib', "<!(node -e \"require('nan')\")"],
+      "include_dirs" : ["../prime4lib", "<!(node -e \"require('nan')\")"],
       "conditions": [ 
-        [ 'OS=="mac"', { 
+        [ "OS=='mac'", { 
             "xcode_settings": { 
-                'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11','-stdlib=libc++'], 
-                'OTHER_LDFLAGS': ['-stdlib=libc++'], 
-                'MACOSX_DEPLOYMENT_TARGET': '10.7' } 
+                "OTHER_CPLUSPLUSFLAGS" : ["-std=c++11","-stdlib=libc++"], 
+                "OTHER_LDFLAGS": ["-stdlib=libc++"], 
+                "MACOSX_DEPLOYMENT_TARGET": "10.7" } 
             }
         ] 
       ] 
@@ -219,7 +219,7 @@ There are a few new things in this bindings file.  First, notice there is no "ty
 
 To build, do a `node-gyp configure build` from `/cpp/nodeprime_sync`.  The `nodeprime.node` file will be located in `/cpp/nodeprimes_sync/build/Release` - which we'll link to in a moment.
 
-## Calling from JavaScript
+### Calling from JavaScript
 Now comes the easy part!  First, we need to require the module.  We specify a path in the require command
 
 ```js
@@ -244,10 +244,10 @@ var retval = nodeprime.getPrimes(100)
 console.log(retval);
 ```
 
-# Asynchronous Addon Code
+## Asynchronous Addon Code
 Synchronous code is a real problem if you are integrating a web application.  If the JavaScript code above were executed in response to an HTTP request, no other requests can be processed until the array is returned.  The C++ code is executing in the Node.js event loop.  **Bad**
 
-## Understanding the event-loop / worker thread relationship
+### Understanding the event-loop / worker thread relationship
 We need to get the prime number computation off the Node.js event loop and into another thread.  This actually is fairly easy, thanks to Nan - which abstracts the way you'd normally need to interact with libuv, Node's event/threading framework.  
 
 The key to understanding Nan's abstractions and my code is to recognize that when your JavaScript calls your addon, all data coming from JavaScript belongs to V8.  We are going to launch a worker thread to do the computation, which allows the C++ code initally invoked to return back to JavaScript.  That's critical, because it means any data the worker thread accesses must **not** belong to JavaScript, as the scope of the initial invocation of your C++ code is destroyed.
@@ -256,7 +256,7 @@ Likewise, data *produced* inside the worker thread is inaccessible to JavaScript
 
 Thankfully, Nan provides a class - called `AsyncWorker` which sets up an easy pattern for doing all of this - making the thread creation and interaction with libuv completely transparent.  All we have to do is extend `AsyncWorker` and plug our code in.
 
-## Asynchronous Worker Code
+### Asynchronous Worker Code
 I've created the asynchronous addon in `/cpp/nodeprime`.  Within that folder, you'll see a package.json file (you need to do a `npm install`) that sets up Nan.  You'll also see a similar binding.gyp file as before, and another addon.cpp file that contains the asynchronous addon.
 
 First off, inside `addon.cpp`, you'll see the top part (includes/namespaces) and bottom part (`NAN_METHOD` and `NODE_MODULE`) are exactly the same.  The change now is how `CalculatePrimes` is implemented, and the addition of the PrimeWorker class, which inherits `AsyncWorker` and contains all the logic for doing the work.  Before diving in, let's look at what the calling JavaScript code will eventually look like:
@@ -330,7 +330,7 @@ The final step is to actually invoke the JavaScript callback that was sent in as
 
 You'll need to do another `node-gyp configure build` to build this module, and now we can call it from Node.js.
 
-## Calling from JavaScript
+### Calling from JavaScript
 As shown above, we just need to `require` the module now:
 
 ```js
@@ -346,7 +346,7 @@ primes.getPrimes(100, function (err, primes){
 
 ```
 
-# Putting it all together...
+## Putting it all together...
 OK... so lets put this on the web app we've been developing over the last few posts.  I'll show you the asynchronous version, since the synchronous model really doesn't play well with the web.
 
 Inside the `/web/index.js` file we are going to add another entry for a route called `ffi`.  
@@ -389,7 +389,7 @@ router.post('/', function(req, res) {
 ````
 Fire up the web app (`node index` from `/web`) and try the link for `addon`.  No surprises.
 
-# Conclusion
+## Conclusion
 And that's it!  Over the last four posts I've outlined some useful methods for getting C++ onto the web.  I've gotten a bunch of feedback from readers about other approaches as well - like using [emscripten](https://github.com/kripken/emscripten) to compile C++ into JavaScript (thank you [Hacker News](https://news.ycombinator.com/item?id=10809475)!).  I've detailed [automation](/automating-a-c-program-from-a-node-js-web-app) through child processes, using ffi to invoke [shared libraries](/calling-native-c-dlls-from-a-node-js-web-app), and in this post I've shown you how to use Nan to build an asynchronous addon that can be seamlessly integrated into your Node.js app.  Hope this information has helped!
 
 **P.S.** If you are looking for some more info on writing Node.js addons in C++, check my [ebook](/book/) on Node and C++ integration, along with my previous posts below. You can [buy it here](https://gumroad.com/l/dTVf).

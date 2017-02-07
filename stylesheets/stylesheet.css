@@ -830,6 +830,13 @@ dl dd {
   }
 }
 
+.book-recs {
+  list-style-type: none;
+  padding-left:0;
+}
+.book-recs li{
+  margin-top:1em;
+}
 .book-sidebar {
   margin-bottom:100px;
   text-align:center;

@@ -76,7 +76,7 @@ In both cases, our C++ addon will collect data sent from JavaScript and when a s
 ## Setting up the addon project
 Inside the `/addon` directory, let's start out by creating a package.json for the accumulator addon.
 
-```js
+```json
 {
   "name": "accumulator",
   "version": "0.0.1",
@@ -90,15 +90,15 @@ Inside the `/addon` directory, let's start out by creating a package.json for th
 
 Note that the dependencies include [`NAN`](https://github.com/nodejs/nan) and the actual SDK, `streaming-worker-sdk`.  Next we need to create the `binding.gyp` file.   If you are using a relatively new version of clang/g++/msvs/xcode, the following file will be sufficient.  If you are using an older compiler, you may need to add some additional flags to enable full C++ 11 support.
 
-```js
+```json
 {
   "targets": [
     {
       "target_name": "accumulator",
       "sources": [ "accumulator.cpp" ], 
       "cflags": ["-Wall", "-std=c++11"],
-      "cflags!": [ '-fno-exceptions' ],
-      "cflags_cc!": [ '-fno-exceptions' ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
       "include_dirs" : [
 		"<!(node -e \"require('nan')\")", 
 		"<!(node -e \"require('streaming-worker-sdk')\")"

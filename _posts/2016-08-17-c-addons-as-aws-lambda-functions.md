@@ -49,14 +49,14 @@ This probably should have been Requirement 1... For much the same reasons as abo
 At the time of this writing, AWS Lambda supports Node.js 0.10 and 4.3,  You should absolutely pick 4.3.  In the future these versions could change - so edit accordingly.  I like to use [`nvm`](https://github.com/creationix/nvm) to install and switch between Node.js versions.  If you don't already have it, go ahead and install:
 
 
-```
+```shell
 > curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
 > source ~/.profile
 ```
 
 Now install Node.js 4.3 and install `node-gyp` while you are at it.
 
-```
+```shell
 > nvm install 4.3
 > npm install -g node-gyp
 ```
@@ -64,7 +64,7 @@ Now install Node.js 4.3 and install `node-gyp` while you are at it.
 ### Requirement 4:  C++ build tools (C++11)
 When you are doing Node.js addon development for Node.js v4+, you must use a compiler that supports C++ 11.  Recent versions of Visual Studio (Windows) and XCode (Mac OS X) all will due - but since we need to build on Linux, we just need to make sure we install g++ 4.7 or above.  Here's how you'd install g++ 4.9 on Mint/Ubuntu:
 
-```
+```shell
 > sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 > sudo apt-get update
 > sudo apt-get install g++-4.9
@@ -79,7 +79,7 @@ We're actually going to actually create two Node.js projects.  One will be the C
 
 Lets start first with the addon.
 
-```
+```shell
 > mkdir lambda-cpp
 > mkdir lambda-cpp/addon
 > cd lambda-cpp/addon
@@ -89,7 +89,7 @@ To create the addon, we need three files - our C++ source, a `package.json` to t
 
 Let's start with the easiest - `binding.gyp`
 
-```js
+```json
 {
   "targets": [
     {
@@ -103,7 +103,7 @@ This is probably the most basic `binding.gyp` file you could have - we simply sp
 
 Now let's create `package.json`, which must be setup so it defines the entry point of this addon to the binary target.
 
-```js
+```json
 {
   "name": "average",
   "version": "1.0.0",
@@ -178,7 +178,7 @@ Now let's actually create the AWS Lambda handler.   As you (probably) already kn
 
 While I could do this right in the `addon` directory (requiring the addon using the relative path to the `average.node` binary), I prefer to create this as a distinct Node.js program - and pull in the local addon as an `npm` dependency. Let's create a new directory along side the `lambda-cpp/addon` directory called `lambda-cpp/lambda`.
 
-```
+```shell
 > cd ..
 > mkdir lambda
 > cd lambda
@@ -211,7 +211,7 @@ Note that we've required `average` as if it were an external dependency.  Let's 
 
 When you do an `npm install`, `npm` will pull your local addon and make a copy of it inside `/node_modules`, and invoke `node-gyp` to build it.  Your directory structure should be as follows:
 
-```
+```shell
 /lambda-cpp
  -- /addon
     -- average.cpp
@@ -227,7 +227,7 @@ When you do an `npm install`, `npm` will pull your local addon and make a copy o
 ## Testing locally
 Now that `index.js` is exporting a Lambda handler, we could upload it directly to Amazon Lambda - but first you might want to test it out locally to make sure things are working well.  There's a nice module - `lambda-local` - that can help us with this.
 
-```
+```shell
 npm install -g lambda-local
 ```
 
@@ -243,7 +243,7 @@ module.exports = {
 
 Now we can execute our lambda locally with the following command:
 
-```
+```shell
 > lambda-local -l index.js -h averageHandler -e sample.js
 Logs
 ------
@@ -267,7 +267,7 @@ Assuming you have an Administrator AWS user account, you need to grab an Access 
 
 Once you have your access keys, you need to install the CLI.  There are a few ways to do this, and it requires Python to be installed on your machine.  The most straight foward install (IMO) is the Bundled Installer:
 
-```
+```shell
 > curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
 > unzip awscli-bundle.zip
 > sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
@@ -275,7 +275,7 @@ Once you have your access keys, you need to install the CLI.  There are a few wa
 
 Next, you'll need to configure the CLI.  Type `aws configure` and enter your access key and secret key downloaded a moment ago.  You can also choose a default region and output format.  You probably should attach a profile to this configuration (you'll need it later) using the --profile <profile name> argument.
 
-```
+```shell
 > aws configure --profile lambdaProfile
 AWS Access Key ID [None]: XXXXXXXXX
 AWS Secret Access Key [None]: XXXXXXXXXXXXXXXXXXXX
@@ -285,7 +285,7 @@ Default output format [None]:
 ```
 You can verify that you've set this all up correctly by listing your Lambda functions:
 
-```
+```shell
 > aws lambda list-functions
 {
     "Functions": []
@@ -303,12 +303,12 @@ The most crucial (and judging by questions online, often overlooked) step in thi
 
 Inside the directory containing `index.js`, zip up all the files that should be deployed.  I'll put the zip in the `lambda-addon` parent directory.
 
-```
+```shell
 > zip -r ../average.zip node_modules/ average.cpp index.js binding.gyp package.json 
 ```
 **Note the -r ** - you need to entire `node_modules` directory.  Verify the package with `less`.  You should see something along the lines of this:
 
-```
+```shell
 less ../average.zip
 
 Archive:  ../average.zip
@@ -351,7 +351,7 @@ If you don't see contents of the `node_modules` directory inside the zip, or if 
 ### Uploading to AWS Lambda
 Now we can can create the Lambda function using the `lambda create-function` command.  Make sure you update the region accordingly for your setup:
 
-```
+```shell
 > aws lambda create-function \
 --region us-west-2 \
 --function-name average \
@@ -368,7 +368,7 @@ If all goes well, you should receive a JSON response with some additional info a
 ### Testing with AWS CLI
 Now that we've deployed the function, let's test it out again - this time using the CLI.  Invoke the function, specifying the same event as last time (which is called `payload` by the CLI).
 
-```
+```shell
 > aws lambda invoke \
 --invocation-type RequestResponse \
 --function-name average \
@@ -382,7 +382,7 @@ output.txt
 
 You'll get something that looks like this:
 
-```
+```json
 {
     "LogResult": "U1RBUlQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYgVmVyc2lvbjogJExBVEVTVApFTkQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYKUkVQT1JUIFJlcXVlc3RJZDogMTNlMTU5OGQtNjRjMS0xMWU2LTg0NDctMGQ2YzIyYzE0YWVmCUR1cmF0aW9uOiAwLjUxIG1zCUJpbGxlZCBEdXJhdGlvbjogMTAwIG1zIAlNZW1vcnkgU2l6ZTogMTI4IE1CCU1heCBNZW1vcnkgVXNlZDogMzUgTUIJCg==", 
     "StatusCode": 200
@@ -391,7 +391,7 @@ You'll get something that looks like this:
 
 Not helpful - but easily decoded.  The LogResult is encoded in base64, so you can do the following:
 
-``` 
+```shell
 > echo U1RBUlQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYgVmVyc2lvbjogJExBVEVTVApFTkQgUmVxdWVzdElkOiAxM2UxNTk4ZC02NGMxLTExZTYtODQ0Ny0wZDZjMjJjMTRhZWYKUkVQT1JUIFJlcXVlc3RJZDogMTNlMTU5OGQtNjRjMS0xMWU2LTg0NDctMGQ2YzIyYzE0YWVmCUR1cmF0aW9uOiAwLjUxIG1zCUJpbGxlZCBEdXJhdGlvbjogMTAwIG1zIAlNZW1vcnkgU2l6ZTogMTI4IE1CCU1heCBNZW1vcnkgVXNlZDogMzUgTUIJCg== |  base64 --decode 
 
 START RequestId: 13e1598d-64c1-11e6-8447-0d6c22c14aef Version: $LATEST
@@ -412,7 +412,7 @@ exports.averageHandler = function(event, context, callback) {
 
 After decoding the output, you'll see something like this:
 
-```
+```shell
 START RequestId: 1081efc9-64c3-11e6-ac21-43355c8afb1e Version: $LATEST
 2016-08-17T21:39:24.013Z	1081efc9-64c3-11e6-ac21-43355c8afb1e	{ op1: 4, op2: 15, op3: 2 }
 2016-08-17T21:39:24.013Z	1081efc9-64c3-11e6-ac21-43355c8afb1e	7

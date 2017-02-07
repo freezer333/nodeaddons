@@ -53,7 +53,7 @@ Messages that get sent from the addon back to JavaScript could be dealt with dir
 ## Setting up the addon project
 Inside the `/addon` directory, let's start out by creating a package.json for the sensor addon.
 
-```js
+```json
 {
   "name": "sensor_sim",
   "version": "0.0.1",
@@ -69,15 +69,15 @@ Note `gypfile` is set to true - this is going to be a C++ addon, not something t
 
 Up next, let's create the `binding.gyp` file.  If you are foggy on addon development, the C++ code we create will be built with `node-gyp`, a cross-platform build system that uses your native compiler to build addon executables.  `binding.gyp` allows you to configure the build - setting up include directories and specifying compiler options.  If you are using a relatively new version of clang/g++/msvs/xcode, the following file will be sufficient.  If you are using an older compiler, you may need to add some additional flags to enable full C++ 11 support.
 
-```js
+```json
 {
   "targets": [
     {
       "target_name": "sensor_sim",
       "sources": [ "sensor_sim.cpp" ], 
       "cflags": ["-Wall", "-std=c++11"],
-      "cflags!": [ '-fno-exceptions' ],
-      "cflags_cc!": [ '-fno-exceptions' ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
       "include_dirs" : [
 		"<!(node -e \"require('nan')\")", 
 		"<!(node -e \"require('streaming-worker-sdk')\")"
@@ -102,19 +102,19 @@ Now let's create the `sensor_sim.cpp` file.  We'll start out by including the ba
 
 using namespace std;
 using json = nlohmann::json;
-````
+```
 
 Most of these are self-explanatory.   I'm going to produce random positional datapoints, so I'm including `random`.  I'm also going to generate these datapoints once every few milliseconds, so I'll use `chrono` and `thread` to sleep for specific intervals.  `streaming-worker.h` is going to give me the streaming logic - specifically the `StreamingWorker` I'll inherit from.  Finally, I've included `json.hpp` - a fantastic JSON library for C++ found [here](https://github.com/nlohmann/json).  Please download that `hpp` file too, and put it directly in the `/addon` directory.  We'll end up using this to construct position samples in C++ that can be consumed as JSON in JavaScript - something like this:
 
-```js
+```json
 { 
-    position:
+    "position":
     { 
-        x: -0.0505441173468603,
-        y: -0.452091167700998,
-        z: 0.49470661007039 
+        "x": -0.0505441173468603,
+        "y": -0.452091167700998,
+        "z": 0.49470661007039 
     },
-    sensor: 'Head Mounted Display' 
+    "sensor": "Head Mounted Display" 
 }
 ```
 
@@ -220,7 +220,7 @@ After pulling down the dependencies, npm will build the addon - placing the exec
 ## JavaScript program
 Let's move over now to the `js` directory, where we'll write the JavaScript program to use the addon.  We'll start again with `package.json` to declare our dependencies.
 
-```js
+```json
 {
   "name": "sensor_sim",
   "version": "0.0.1",

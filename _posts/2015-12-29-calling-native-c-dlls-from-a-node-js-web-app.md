@@ -46,7 +46,7 @@ For this particular post, checkout the **dll** tag
 ```
 Once you've checked out the code, take a moment to survey the directory structure I've setup.  The `/cpp` directory is where I've put all the C++ applications developed for the [automation post](/automating-a-c-program-from-a-node-js-web-app), with the shared source for prime number generation in `/cpp/prime4standalone`.  In this post, we'll need to modify the prime number code to allow it to work well as a DLL, and I'll put that code in `/cpp/prime4lib`.  As was the case in the other posts, the sample web application is in `/web`.  We'll just be adding one route (`ffi`) in this post - for the shared library implementation.
 
-# Preparing the C++ as a Shared Library
+## Preparing the C++ as a Shared Library
 If you are trying to integrate an existing shared library into Node.js, then you can basically skip this section - you are all set!  If you have some legacy C++ code that was originally a standalone app (or part of one), you need to prepare your code to work as a shared library first.  The major considerations when doing this is defining your API - the set of functions that should be callable by the host code (in our case, Node.js).  Perhaps your C++ already is organized such that these functions are ready to go - but you may need to do a bit of reorganization.
 
 Another main consideration is how you'll get your C++ code's output.  For example, in the [automation post](/automating-a-c-program-from-a-node-js-web-app), I ran a bunch of standalone primesieve applications from Node - each one either outputted prime numbers directly to standard out or to an output file.  We don't want this for shared libraries though - we want the output *returned* to the caller.  To do this, you might need to get a bit creative - I'll show you how I've done it in the section below.
@@ -59,7 +59,7 @@ int getPrimes(int under, int primes[]);
 
 The first parameter represents the maximum value - such that we'll find all prime numbers *under* this value.  The prime numbers will be stuffed into the second parameter - an array.  It is assumed that this array has enough space to store all the generated prime numbers (`under` is a good "maximum" size.).  The function will return how many prime numbers were actually found.
 
-## Capturing the output
+### Capturing the output
 Now let's look at the code from the [automation post](/automating-a-c-program-from-a-node-js-web-app).  Inside `/cpp/prime4standalone`, the `primesieve.c` file had one main function:
 
 ```c++
@@ -70,7 +70,7 @@ It also has an adapter, `generate`, which replaces the argc/argv parameters with
 
 One approach might be to just start hacking away at the underlying primesieve implementation, replacing the `fprintf` calls with some code to load up an array.  This can work (especially if this is new C++ code, or at least C++ that is fairly straigtforward), but it's not particularly scalable (what if you have a more complex set of actions you need to perform to capture the output?).  I find making modifications to legacy programs goes best when you keep your changes simple - and that's what I'll do here.
 
-### Data Exchange utility class useable from C or C++
+#### Data Exchange utility class useable from C or C++
 As with most things in life, keeping one thing simple often makes something else more complicated.  My goal is to replace each `fprintf` statement in the existing primeseive code with a similarly simple function:
 
 ```c++
@@ -138,7 +138,7 @@ void pass(void * exchanger, int data) {
 
 It's a bit elaborate, but the `exchange` class and it's standalone `pass` helper function can be dropped into nearly any existing C++ or C legacy program, simply by getting a pointer to an `exchange` object into the legacy code and replacing output calls with `pass`.  Let's do this with `primesieve.c`.
 
-### Modifying primesieve to use passing function
+#### Modifying primesieve to use passing function
 Inside `/cpp/prime4lib` I have a modified `primesieve.h` and `primesieve.c`.  The **old** `primesieve.h` defined the following two functions:
 
 ```c++
@@ -157,7 +157,7 @@ int generate_args(int under, void * out);
 
 Inside `primeseive.c` the old standalone code had a `#define` setup to use fprintf, on line 43. *Note, I am not the author of the original [primsieve code](http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.html) - I do not know the history or intent behind the elaborate printing scheme.  As with most legacy apps, sometimes those questions are better left un-asked!*.  We now replace the `fprintf(out, UL"\n",x)` call with a call to `pass(out, x)`.
 
-### The shared library entry point
+#### The shared library entry point
 Now we have a `primesieve.h/primeseive.c` implementation that uses `pass`, we just need to create a C++ entry point that creates an `exchange` object and calls the primesieve code.  I have done this in `/cpp/lib4ffi/primeapi.h` and `/cpp/lib4ffi/primeapi.cpp`.
 
 `primeapi.h` is the shared library entry point, it has the declaration for the library API function I wished for up above:
@@ -186,12 +186,12 @@ int getPrimes(int under, int primes[]) {
 ```
 Now, when we call `generate_primes`, which is defined in `primesieve.h`, we pass in a reference to our exchange.  Within `primesieve.c` that reference to the exchange object is called `out`.  All calls to `pass(out, x)` in `primesieve.c` result in the pointer `out` being cast as an `exchange` object (in `exchange.cpp`), and the callback (the lambda) is fired.  *The end result is that all values computed by `primesieve` are found in the `primes` array.*
 
-## Building the Shared Library with gyp
+### Building the Shared Library with gyp
 We need to build our shared library now.  Luckily, the very same toolset we used in the previous posts - `node-gyp` - can help us here as well.  Inside `/cpp/lib4ffi` you'll find another config file named `binding.gyp`.  It's quite similar to the gyp files found in the standalone examples from the [previous post](/automating-a-c-program-from-a-node-js-web-app), but it links in the primesieve files from `/cpp/prime4lib` instead of `/cpp/prime4standalone` and it's build type is `shared_library` instead of `executable`.
 
 Build the shared library by issuing the familiar `node-gyp configure build` from `cpp/lib4ffi`.  This will generate a target shared library we can use from node.  The shared library will be in `/cpp/lib4ffi/build/Release` - with an extension specific to your operating system (ie. prime.dylib on OS X, prime.dll on Windows).
 
-# Calling primelib with FFI
+## Calling primelib with FFI
 All that work and we have a shared library - now let's call it from Node.js.  To do this, we'll use Node's Foriegn Function Interface ([node-ffi](https://github.com/node-ffi/node-ffi)).  node-ffi is a Node.js addon for loading and calling dynamic libraries using pure JavaScript.  There is an excellent tutorial [here](https://github.com/node-ffi/node-ffi/wiki/Node-FFI-Tutorial) that outlines some more detail.  In particular, checkout the [async](https://github.com/node-ffi/node-ffi/wiki/Node-FFI-Tutorial#async-library-calls) section, which shows you how to easily call shared library methods in their own threads using libuv so you don't block your main Node.js event loop!
 
 One of the key parts of using `node-ffi` is mastering the `ref` module to build native data types on top of the Node.js `Buffer` object.  These datatypes (int, arrays, etc.) allow you to interact with native functions found inside a shared library.
@@ -228,7 +228,7 @@ var count = libprime.getPrimes(under, a);
 var primes = a.toArray().slice(0, count);
 ```
 
-# Putting it all together
+## Putting it all together
 Now that we have a shared library, and the Node.js code that can call it, let's wrap it all up into it's own route inside our growing web app example.  Inside the `/web/index.js` file we are going to add another entry for a route called `ffi`.  
 
 ```js
@@ -237,7 +237,7 @@ var types = [
     title: "pure_node",
     description: "Execute a really primitive implementation of prime sieve in Node.js"
   },
-  ... the entries for the automation example routes...
+  //... the entries for the automation example routes...
   {
     title: "ffi",
     description: "Using Node Foreign Function Interface (ffi) to call C++ code.  Based on /cpp/lib4ffi"
@@ -287,7 +287,7 @@ Now fire up your web app by typing `node index.js` from `/web` and choose the ff
 
 ![Results for primes under 100](https://raw.githubusercontent.com/freezer333/cppwebify/master/posts/img003.png)
 
-# Up next...
+## Up next...
 This post presented the second option introduced in the series - using a DLL/shared library and `node-ffi`.  This option is perfect if you already have a DLL - but I also spent some time in this post showing you how to take existing standalone programs and re-organizing them so they can be built into shared libraries.  We used node-gyp to build the shared libraries in a cross-platform manner, and I showed you how to call the library using `node-ffi` - effectively integrating the C++ code and Node.js without getting into the details of V8.  This option will work for C and C++ libraries, but also works with any language that can be compiled to a native library (i.e. Rust).  The big advantage over automation is that you can have much more fine-grained coordination between Node.js and C++ - because you can pick and choose when to call any one of the functions your C++ library exposes.
 
 In the [next post](/building-an-asynchronous-c-addon-for-node-js-using-nan), we get to the most complex, but also the most powerful Node.js / C++ integration strategy - writing native Node.js modules.  I've covered native modules extensively in previous [posts](/c-processing-from-node-js), and I'm also working on an [ebook](/book/) covering the subject.  In the next post, I'll show you how to leverage the Nan library to build native modules that are not tied to specific version of the V8 engine - an important topic I've yet to cover on this blog.  
