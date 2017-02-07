@@ -14,19 +14,20 @@ disqus_shortname: scottfrees
 ---
 
 This article is Part 3 of a series of posts on moving data back and forth between Node.js and C++. This series is also expanded upon in my [ebook on Node/C++ Integration](/book/).  In [Part 1](/c-processing-from-node-js), I built up an example of processing rainfall accumulation data in C++ and returning a simple statistic (average) back to JavaScript. In [Part 2](/c-processing-from-node-js-part-2) I modified the C++ addon to return a JavaScript object representing more complete statistics about each location/sample.
+
 <!--more-->
 In each of the previous posts, the JavaScript objects being passed into C++ looked like this:
 
-```js
+```json
 {
       "latitude" : "42.35",
       "longitude" : "-71.06",
       "samples" : [
-          { date : "2015-06-07", rainfall : 2.1 },
-          { date : "2015-06-14", rainfall : 0.5}, 
-          { date : "2015-06-21", rainfall : 1.5}, 
-          { date : "2015-06-28", rainfall : 1.3}, 
-          { date : "2015-07-05", rainfall : 0.9}
+          { "date" : "2015-06-07", "rainfall" : 2.1 },
+          { "date" : "2015-06-14", "rainfall" : 0.5}, 
+          { "date" : "2015-06-21", "rainfall" : 1.5}, 
+          { "date" : "2015-06-28", "rainfall" : 1.3}, 
+          { "date" : "2015-07-05", "rainfall" : 0.9}
        ]
     }
 ```
@@ -44,10 +45,10 @@ In Part 2, the C++ addon returned a `rain_result` object that looked list this:
 
 Now we'll look at passing an array of location data into C++ and having C++ return an array of results back to us.  All the code for this series of posts is found [here](https://github.com/freezer333/nodecpp-demo).
 
-# Receiving an Array from Node
+## Receiving an Array from Node
 If you haven't read [Parts 1](/c-processing-from-node-js) and [2](/c-processing-from-node-js-part-2) of this post please do so now - its important you understand how I'm integrating C++ and JavaScript classes.  Instead of using the V8 object wrapping API, I'm just packing/unpacking data from V8's native objects into and out of my [POCOs](https://en.wikipedia.org/wiki/Plain_Old_C%2B%2B_Object).  While there is a little added work upfront, we'll see this work now be leveraged to make list processing really very easy.  
 
-## Registering the callable addon function
+### Registering the callable addon function
 As always, we start by writing a C++ function in `/cpp/rainfall_node.cc` that will be callable from Node.js.
 
 ```cpp
@@ -126,7 +127,7 @@ results.forEach(function(result){
 
 When you run this with `node rainfall` you'll get no output, only because the C++ function is returning an empty array at this point.  Try putting a `console.log(results)` in, you should see `[]` print out.
 
-## Extracting the Array in C++
+### Extracting the Array in C++
 Now lets skip back to our `CalculateResults` C++ function.  We've been given the function callback arguments object, and our first step is to cast it to a V8 array.
 
 ```cpp
@@ -158,7 +159,7 @@ std::transform(
      calc_rain_stats);
 ```
 
-# Building an Array to return back from C++
+## Building an Array to return back from C++
 Our next step is to move the data we've created into the V8 objects that we'll return.  First, we create a new V8 Array:
 
 ```cpp
@@ -236,12 +237,12 @@ Result for Location 1
 
 ```
 
-## About efficiency
+### About efficiency
 You might be wondering, aren't we wasting a lot of memory by creating POCO copies of all the V8 data?  Its a good point, for all the data being passed into the C++ Addon, the V8 objects (which take up memory) are being moved into new C++ objects.  Those C++ (and their derivatives) are then copied into new V8 objects to be returned... we're doubling memory consumption and its also costing us processing time to do all this!
 
 For most use cases I end up working with, the overhead of memory copying (both time and space) is dwarfed by the actual execution time of the algorithm and processing that I'm doing in C++.  If I'm going through the trouble of calling C++ from Node, its because the actual compute task is *significant*!  
 
 For situations where the cost of copying input/output isn't dwarfed by your actual processing time, it would probably make more sense to use V8 object wrapping API instead.
 
-# Next up... asynchronous execution
+## Next up... asynchronous execution
 Now that we've seen how to move primitives, objects, and lists between Node and C++, in [Part 4](/c-processing-from-node-js-part-4-asynchronous-addons) we'll look at how to execute the bulk of our C++ work asynchronously in a separate thread using [libuv](https://libuv.org/) so JavaScript can just give the add-on a callback and continue on its way.
