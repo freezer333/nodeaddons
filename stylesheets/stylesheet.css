@@ -866,24 +866,15 @@ dl dd {
   color:#DC9456;
 }
 
-.about-sidebar img {
-  width:100%;
+#about-image {
+  width:250px;
   border-radius:10px;
 }
 .about-sidebar p {
   font-size:12pt;
   margin-top:20px;
 }
-.about-sidebar {
-   margin-bottom:200px;
-}
-.node-sidebar {
-  margin-bottom:200px;
-}
 
-.cpp-sidebar {
-  margin-bottom:200px;
-}
 
 
 .subtitle {
@@ -1084,4 +1075,52 @@ nav a.active,
 @media only screen and (min-width: 480px) and (max-width: 767px) { }
 
 /* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
-@media only screen and (max-width: 479px) { }
+@media only screen and (max-width: 479px) { 
+
+  
+}
+
+@media only screen and (min-width: 767px) {
+  .about-sidebar {
+    margin-bottom:200px;
+  }
+  .node-sidebar {
+    margin-bottom:200px;
+  }
+
+  .cpp-sidebar {
+    margin-bottom:200px;
+  }
+  .book-image {
+    float:left; 
+  }
+  .book-heading-text {
+    padding-left:275px;
+  }
+  .book-buy-button {
+    float:left; margin-right:20px; margin-bottom:50px;
+    display:inline;
+  }
+  
+}
+@media only screen and (max-width: 767px) {
+  .frustration {
+    display:none;
+  }
+  .profile {
+    float:none;
+  }
+  .page_content {
+    font-size:16pt;
+    text-align:left;
+  }
+  body {
+    font-size:16pt;
+  }
+  .form-label {float:left; width:180px}
+  .book-buy-button {
+    float:none; margin-bottom:20px;
+    display:block;
+    width:75px;
+  }
+}
