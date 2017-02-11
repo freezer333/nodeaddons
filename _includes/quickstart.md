@@ -1,5 +1,7 @@
 # Addon Quickstart
-Welcome!  This is a quick guide-sheet to get you started with Node.js C++ addons.  It's meant to be super-easy to skim and copy/paste into your code.  If you are looking for more explanation and depth, checkout the <b>blog</b>, the full <b>code tutorial</b>, the <b>book</b>, or <b> the complete video course</b>.
+Welcome!  This is a quick guide-sheet to get you started with Node.js C++ addons.  It's meant to be super-easy to skim and copy/paste into your code.  
+
+If you are looking for more explanation and depth, checkout the [blog](/blog/), my [book](/book), the full [code demo](https://github.com/freezer333/nodecpp-demo).
 
 ## Project structure
 Always create your addon in it's own directory.  If it's going to be reusable, move the directory outside of your main project directory.  

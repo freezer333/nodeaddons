@@ -738,9 +738,7 @@ dl dd {
   .inner, .page_content{
     width: 740px;
   }
-  header h1, header h2 {
-    width: 340px;
-  }
+  
   header h1 {
     font-size: 60px;
   }
