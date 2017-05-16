@@ -110,7 +110,7 @@ void RainfallData(const v8::FunctionCallbackInfo<v8::Value>& args) {
 }
 ```
 
-Recall from [Part 1](), the `unpack_location` function is where I'm extracting the location (and rainfall samples) from the JavaScript arguments.  I've introduced a new function in `rainfall.h / rainfall.cc` called `calc_rain_stats` which returns a `rain_result` instance based on the `location` instance it is given.  It computes mean/median/standard deviation (see [here](https://github.com/freezer333/nodecpp-demo/blob/master/cpp/rainfall.cc) for implementation.
+Recall from [Part 1](), the `unpack_location` function is where I'm extracting the location (and rainfall samples) from the JavaScript arguments.  I've introduced a new function in `rainfall.h / rainfall.cc` called `calc_rain_stats` which returns a `rain_result` instance based on the `location` instance it is given.  It computes mean/median/standard deviation (see [here](https://github.com/freezer333/nodecpp-demo/blob/master/rainfall/cpp/rainfall.cc) for implementation.
 
 The `RainfallData` function is exported with the addon by adding another call to `NODE_SET_METHOD` inside the `init` function in `rainfall_node.cc`.
 

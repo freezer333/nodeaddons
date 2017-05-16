@@ -81,7 +81,7 @@ Knowing a bit about the V8 API, along with the basics of packaging your module s
 The only catch is (1) the V8 API is tricky - due to the complexities of memory management and coordinating resources between the JavaScript executing in the Node.js event loop and your own modules and (2) the API tends to change in subtle (and not so subtle) ways every so often.  To learn all about the details of this, check out my [posts](/c-processing-from-node-js), and my [ebook](/book/).
 
 ### Nan - protection from the V8 API
-Happily, the folks at [io.js Addon API Working Group](https://github.com/nodejs/nan#governance--contributing) have created and maintained an abstraction layer around the V8 API which can make these challenges a bit easier to deal with.  You can read a lot about it [here](https://nodesource.com/blog/c-add-ons-for-nodejs-v4/)
+Happily, the folks at [io.js Addon API Working Group](https://github.com/nodejs/nan#governance--contributing) have created and maintained an abstraction layer around the V8 API which can make these challenges a bit easier to deal with.  You can read a lot about it [here](https://github.com/nodejs/nan#news)
 
 Nan is ultimately a C++ library, however you install it with npm.  First, we'll create a new project (folder) for our soon-to-be addon.  I've created it at `/cpp/nodeprime_sync`.  Now we'll need to install Nan with the following command:
 
