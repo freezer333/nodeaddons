@@ -4,7 +4,7 @@ Welcome!  This is a quick guide-sheet to get you started with Node.js C++ addons
 If you are looking for more explanation and depth, checkout the [blog](/blog/), my [book](/book), the full [code demo](https://github.com/freezer333/nodecpp-demo).
 
 ## Project structure
-Always create your addon in it's own directory.  If it's going to be reusable, move the directory outside of your main project directory.  
+I recommend you always create your addon in it's own directory.  If it's going to be reusable, move the directory outside of your main project directory.  
 
 Each reusable addon needs (1) a package.json, (2) a binding.gyp, and (3) C++ source code.  If your addon isn't reusable, and isn't a standalone module, then you can omit package.json 
 
